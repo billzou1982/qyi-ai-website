@@ -1,0 +1,17 @@
+{
+  "name": "qyi-ai-website",
+  "version": "1.0.0",
+  "description": "QYI AI - AI Native Developer Portfolio Website",
+  "main": "index.html",
+  "scripts": {
+    "dev": "serve .",
+    "build": "echo 'Static site, no build needed'",
+    "start": "serve ."
+  },
+  "keywords": ["AI", "developer", "portfolio", "web applications"],
+  "author": "QYI AI",
+  "license": "MIT",
+  "devDependencies": {
+    "serve": "^14.2.0"
+  }
+}
