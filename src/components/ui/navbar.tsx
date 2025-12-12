@@ -42,13 +42,30 @@ export function Navbar() {
       }`}>
       <div className="w-full px-4 md:px-8">
         <div className="flex justify-between items-center h-16">
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-700 rounded-xl flex items-center justify-center text-white font-bold text-lg">
-              ⚡
-            </div>
-            <span className="text-xl font-bold text-gray-900">QYI AI</span>
-          </Link>
+          {/* Logo and Academy Section */}
+          <div className="flex items-center gap-6">
+            <Link href="/" className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-700 rounded-xl flex items-center justify-center text-white font-bold text-lg">
+                ⚡
+              </div>
+              <span className="text-xl font-bold text-gray-900">QYI AI</span>
+            </Link>
+
+            {/* Academy Highlight Link - Desktop Only */}
+            <a
+              href="https://academy.qyi-ai.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden md:inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 text-white font-bold rounded-lg shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 relative group"
+            >
+              <span className="relative z-10">{t('nav.academy')}</span>
+              <svg className="w-4 h-4 relative z-10 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
+              {/* Glow effect */}
+              <div className="absolute inset-0 bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 rounded-lg blur-md opacity-50 group-hover:opacity-75 transition-opacity -z-10"></div>
+            </a>
+          </div>
 
           {/* Navigation Links */}
           <div className="hidden md:flex items-center gap-8">
@@ -123,6 +140,17 @@ export function Navbar() {
         {mobileMenuOpen && (
           <div className="md:hidden border-t border-gray-200 bg-white/95 backdrop-blur-md animate-fade-in">
             <div className="py-4 space-y-1">
+              {/* Academy link in mobile menu - highlighted */}
+              <a
+                href="https://academy.qyi-ai.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block mx-4 mb-3 px-4 py-3 bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 text-white font-bold rounded-lg text-center shadow-md"
+              >
+                {t('nav.academy')} →
+              </a>
+
               <button
                 onClick={() => scrollToSection('about')}
                 className="w-full text-left px-4 py-3 text-gray-600 hover:bg-gray-50 hover:text-blue-500 font-medium transition-colors"

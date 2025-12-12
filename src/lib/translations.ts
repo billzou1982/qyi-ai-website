@@ -8,6 +8,7 @@ export const translations = {
       aiTools: "AI Tools",
       blog: "Blog",
       contact: "Contact",
+      academy: "Academy",
     },
     hero: {
       title: "Go bigger,  Do faster",
@@ -113,6 +114,7 @@ export const translations = {
       aiTools: "AI 工具库",
       blog: "博客",
       contact: "联系",
+      academy: "学院",
     },
     hero: {
       title: "做大做强，唯快不破",
