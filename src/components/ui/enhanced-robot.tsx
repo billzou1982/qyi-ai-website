@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { SplineRobotProfessional } from './spline-robot-scene'
-import { cn } from '@/lib/utils'
 
 interface EnhancedRobotProps {
   className?: string
@@ -10,11 +9,9 @@ interface EnhancedRobotProps {
 
 export function EnhancedRobot({ className }: EnhancedRobotProps) {
   const [showWelcome, setShowWelcome] = useState(false)
-  const [isFirstVisit, setIsFirstVisit] = useState(false)
 
   useEffect(() => {
     // Show welcome animation on every page load
-    setIsFirstVisit(true)
     
     // Show welcome message after 3 seconds
     const timer = setTimeout(() => {
@@ -25,7 +22,7 @@ export function EnhancedRobot({ className }: EnhancedRobotProps) {
         const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2+LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR0fPPeSMFl')
         audio.volume = 0.3
         audio.play().catch(() => {}) // Ignore autoplay errors
-      } catch (e) {
+      } catch {
         // Audio failed, that's okay
       }
       

@@ -1,7 +1,6 @@
 'use client'
 
 import { Environment } from '@react-three/drei'
-import * as THREE from 'three'
 
 // 摄影棚级光照组件
 export function StudioLighting({ 

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 
 interface WelcomeAudioProps {
   onPlay?: () => void
@@ -9,14 +9,13 @@ interface WelcomeAudioProps {
   autoPlay?: boolean
 }
 
-export function WelcomeAudio({ 
-  onPlay, 
-  onEnded, 
-  onError, 
-  autoPlay = false 
+export function WelcomeAudio({
+  onPlay,
+  onEnded,
+  onError,
+  autoPlay = false
 }: WelcomeAudioProps) {
   const audioRef = useRef<HTMLAudioElement>(null)
-  const [isPlaying, setIsPlaying] = useState(false)
   const [canPlay, setCanPlay] = useState(false)
   const [hasPlayed, setHasPlayed] = useState(false)
 
@@ -26,12 +25,10 @@ export function WelcomeAudio({
 
     const handleCanPlay = () => setCanPlay(true)
     const handlePlay = () => {
-      setIsPlaying(true)
       setHasPlayed(true)
       onPlay?.()
     }
     const handleEnded = () => {
-      setIsPlaying(false)
       onEnded?.()
     }
     const handleError = () => {
@@ -52,23 +49,23 @@ export function WelcomeAudio({
     }
   }, [onPlay, onEnded, onError])
 
-  const playWelcome = async () => {
+  const playWelcome = useCallback(async () => {
     const audio = audioRef.current
     if (!audio || !canPlay) return
 
     try {
       await audio.play()
-    } catch (error) {
+    } catch {
       console.log('Autoplay blocked, user interaction required')
       onError?.()
     }
-  }
+  }, [canPlay, onError])
 
   useEffect(() => {
     if (autoPlay && canPlay && !hasPlayed) {
       playWelcome()
     }
-  }, [autoPlay, canPlay, hasPlayed])
+  }, [autoPlay, canPlay, hasPlayed, playWelcome])
 
   return (
     <>
