@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Navbar } from "@/components/ui/navbar";
-import { toolsData, Category, Tool } from "@/lib/tools-data";
+import { toolsData, Tool } from "@/lib/tools-data";
 import { motion } from "framer-motion";
 import { useLanguage } from "@/lib/i18n-context";
 

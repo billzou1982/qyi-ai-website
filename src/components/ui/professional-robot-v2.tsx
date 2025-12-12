@@ -6,7 +6,7 @@ import { Float, ContactShadows, MeshReflectorMaterial } from '@react-three/drei'
 import * as THREE from 'three'
 import { ProfessionalRenderer, RenderingLoader } from './professional-renderer'
 import { ProfessionalStudioLighting } from './studio-lighting'
-import { PBRMaterial, usePBRMaterial } from './pbr-materials'
+import { usePBRMaterial } from './pbr-materials'
 import { ClientOnly } from './client-only'
 
 // 高质量程序化机器人 - 使用新的材质和光照系统

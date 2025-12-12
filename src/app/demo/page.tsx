@@ -9,8 +9,6 @@ import { PremiumRobot } from "@/components/ui/premium-robot"
 import { ProfessionalRobotScene } from "@/components/ui/professional-robot-scene"
 import { FlatRobot } from "@/components/ui/flat-robot"
 import { RobotComparison } from "@/components/ui/robot-comparison"
-import { SplineRobotProfessional } from "@/components/ui/spline-robot-scene"
-import { ProfessionalRobotV2 } from "@/components/ui/professional-robot-v2"
 
 export default function DemoPage() {
   return (

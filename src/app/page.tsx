@@ -1,11 +1,44 @@
 "use client";
 
+import dynamic from 'next/dynamic';
 import { SparklesPreviewDark } from "@/components/ui/demo";
 import { Navbar } from "@/components/ui/navbar";
-import { SplineSceneBasic, SplineHeroBackground, SplineAppCard } from "@/components/ui/spline-demo";
-import { SplineRobotProfessional } from "@/components/ui/spline-robot-scene";
 import { StaticSpotlight } from "@/components/ui/static-spotlight";
-import { EnhancedRobot } from "@/components/ui/enhanced-robot";
+
+// Dynamically import heavy 3D components for better performance
+const EnhancedRobot = dynamic(
+  () => import('@/components/ui/enhanced-robot').then(mod => ({ default: mod.EnhancedRobot })),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-full flex items-center justify-center">
+        <div className="animate-pulse text-blue-400">Loading 3D Scene...</div>
+      </div>
+    )
+  }
+);
+
+const SplineRobotProfessional = dynamic(
+  () => import('@/components/ui/spline-robot-scene').then(mod => ({ default: mod.SplineRobotProfessional })),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-full flex items-center justify-center">
+        <div className="animate-pulse text-blue-400">Loading Interactive Demo...</div>
+      </div>
+    )
+  }
+);
+
+const SplineAppCard = dynamic(
+  () => import('@/components/ui/spline-demo').then(mod => ({ default: mod.SplineAppCard })),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-full bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl animate-pulse"></div>
+    )
+  }
+);
 import {
   Bot,
   Zap,
@@ -13,17 +46,8 @@ import {
   Linkedin,
   Github,
   Play,
-  ArrowRight,
   Terminal,
-  Cpu,
-  Globe,
-  Code,
-  Video,
-  Sparkles,
-  Brain,
-  Rocket,
-  Layers,
-  Smartphone
+  Video
 } from "lucide-react";
 import { useLanguage } from "@/lib/i18n-context";
 

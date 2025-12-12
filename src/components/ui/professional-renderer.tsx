@@ -138,7 +138,7 @@ export function ProfessionalRenderer({
 export function StudioRenderer({
   children,
   className = '',
-  autoRotate = false,
+  autoRotate: _autoRotate = false,
   zoomLevels = { min: 2, max: 10, default: 5 }
 }: {
   children: ReactNode

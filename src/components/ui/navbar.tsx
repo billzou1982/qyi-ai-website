@@ -7,6 +7,7 @@ import { useLanguage } from '@/lib/i18n-context';
 
 export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { language, toggleLanguage, t } = useLanguage();
 
   useEffect(() => {
@@ -21,6 +22,8 @@ export function Navbar() {
   const pathname = usePathname();
 
   const scrollToSection = (sectionId: string) => {
+    setMobileMenuOpen(false); // Close mobile menu when navigating
+
     if (pathname !== '/') {
       window.location.href = `/#${sectionId}`;
       return;
@@ -97,13 +100,63 @@ export function Navbar() {
             >
               {language}
             </button>
-            <button className="p-2 text-gray-600">
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="p-2 text-gray-600 hover:text-gray-900 transition-colors"
+              aria-label="Toggle mobile menu"
+              aria-expanded={mobileMenuOpen}
+            >
+              {mobileMenuOpen ? (
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              ) : (
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              )}
             </button>
           </div>
         </div>
+
+        {/* Mobile Menu */}
+        {mobileMenuOpen && (
+          <div className="md:hidden border-t border-gray-200 bg-white/95 backdrop-blur-md animate-fade-in">
+            <div className="py-4 space-y-1">
+              <button
+                onClick={() => scrollToSection('about')}
+                className="w-full text-left px-4 py-3 text-gray-600 hover:bg-gray-50 hover:text-blue-500 font-medium transition-colors"
+              >
+                {t('nav.about')}
+              </button>
+              <button
+                onClick={() => scrollToSection('apps')}
+                className="w-full text-left px-4 py-3 text-gray-600 hover:bg-gray-50 hover:text-blue-500 font-medium transition-colors"
+              >
+                {t('nav.apps')}
+              </button>
+              <Link
+                href="/ai-tools"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block px-4 py-3 text-gray-600 hover:bg-gray-50 hover:text-blue-500 font-medium transition-colors"
+              >
+                {t('nav.aiTools')}
+              </Link>
+              <button
+                onClick={() => scrollToSection('video-tutorials')}
+                className="w-full text-left px-4 py-3 text-gray-600 hover:bg-gray-50 hover:text-blue-500 font-medium transition-colors"
+              >
+                {t('nav.blog')}
+              </button>
+              <button
+                onClick={() => scrollToSection('contact')}
+                className="w-full text-left px-4 py-3 text-gray-600 hover:bg-gray-50 hover:text-blue-500 font-medium transition-colors"
+              >
+                {t('nav.contact')}
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </nav>
   );
