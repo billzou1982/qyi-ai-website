@@ -42,21 +42,22 @@ export function Navbar() {
       }`}>
       <div className="w-full px-4 md:px-8">
         <div className="flex justify-between items-center h-16">
-          {/* Logo and Academy Section */}
-          <div className="flex items-center gap-6">
-            <Link href="/" className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-700 rounded-xl flex items-center justify-center text-white font-bold text-lg">
-                ⚡
-              </div>
-              <span className="text-xl font-bold text-gray-900">QYI AI</span>
-            </Link>
+          {/* Logo */}
+          <Link href="/" className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-700 rounded-xl flex items-center justify-center text-white font-bold text-lg">
+              ⚡
+            </div>
+            <span className="text-xl font-bold text-gray-900">QYI AI</span>
+          </Link>
 
-            {/* Academy Highlight Link - Desktop Only */}
+          {/* Navigation Links */}
+          <div className="hidden md:flex items-center gap-8">
+            {/* Academy Highlight Link */}
             <a
               href="https://academy.qyi-ai.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="hidden md:inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 text-white font-bold rounded-lg shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 relative group"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 text-white font-bold rounded-lg shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 relative group"
             >
               <span className="relative z-10">{t('nav.academy')}</span>
               <svg className="w-4 h-4 relative z-10 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -65,10 +66,7 @@ export function Navbar() {
               {/* Glow effect */}
               <div className="absolute inset-0 bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 rounded-lg blur-md opacity-50 group-hover:opacity-75 transition-opacity -z-10"></div>
             </a>
-          </div>
 
-          {/* Navigation Links */}
-          <div className="hidden md:flex items-center gap-8">
             <button
               onClick={() => scrollToSection('about')}
               className="text-gray-600 hover:text-blue-500 font-medium transition-colors"
