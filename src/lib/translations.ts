@@ -27,6 +27,8 @@ export const translations = {
       demoTitle: "Interactive 3D",
       demoDesc: "Bring your AI applications to life with beautiful 3D scenes. Create immersive experiences that capture attention and showcase cutting-edge technology.",
       demoTags: "Interactive • Responsive • Optimized",
+      mobileTitle: "Desktop Experience Required",
+      mobileMessage: "This interactive 3D experience is optimized for desktop browsers. Visit on a larger screen for the full immersive experience.",
     },
     apps: {
       title: "AI Applications",
@@ -133,6 +135,8 @@ export const translations = {
       demoTitle: "交互式 3D",
       demoDesc: "用精美的 3D 场景点亮你的 AI 应用。创造引人入胜的沉浸式体验，展示前沿科技的魅力。",
       demoTags: "交互 • 响应式 • 极致优化",
+      mobileTitle: "需要桌面端体验",
+      mobileMessage: "此交互式 3D 体验针对桌面浏览器进行了优化。请在大屏设备上访问以获得完整的沉浸式体验。",
     },
     apps: {
       title: "AI 应用展示",

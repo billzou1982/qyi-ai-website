@@ -4,8 +4,9 @@ import dynamic from 'next/dynamic';
 import { SparklesPreviewDark } from "@/components/ui/demo";
 import { Navbar } from "@/components/ui/navbar";
 import { StaticSpotlight } from "@/components/ui/static-spotlight";
+import { useIsMobile } from "@/lib/use-mobile";
 
-// Dynamically import heavy 3D components for better performance
+// Dynamically import heavy 3D components for better performance (desktop only)
 const EnhancedRobot = dynamic(
   () => import('@/components/ui/enhanced-robot').then(mod => ({ default: mod.EnhancedRobot })),
   {
@@ -47,12 +48,14 @@ import {
   Github,
   Play,
   Terminal,
-  Video
+  Video,
+  Sparkles
 } from "lucide-react";
 import { useLanguage } from "@/lib/i18n-context";
 
 export default function Home() {
   const { t } = useLanguage();
+  const isMobile = useIsMobile();
   return (
     <div>
       <Navbar />
@@ -103,9 +106,18 @@ export default function Home() {
 
               {/* Right Side - 3D Robot with Welcome */}
               <div className="flex justify-center items-center order-1 md:order-2 relative z-20 overflow-visible">
-                <div className="w-full h-[350px] sm:h-[400px] md:h-[450px] lg:h-[500px] xl:h-[550px] relative">
-                  <EnhancedRobot />
-                </div>
+                {!isMobile ? (
+                  <div className="w-full h-[350px] sm:h-[400px] md:h-[450px] lg:h-[500px] xl:h-[550px] relative">
+                    <EnhancedRobot />
+                  </div>
+                ) : (
+                  <div className="w-full h-[350px] flex items-center justify-center">
+                    <div className="relative group">
+                      <div className="absolute inset-0 bg-blue-500/20 blur-3xl rounded-full animate-pulse"></div>
+                      <Sparkles className="w-32 h-32 text-blue-400 relative z-10 animate-pulse" />
+                    </div>
+                  </div>
+                )}
               </div>
 
             </div>
@@ -169,9 +181,22 @@ export default function Home() {
           </div>
 
           <div className="flex justify-center">
-            <div className="w-full max-w-4xl h-[500px]">
-              <SplineRobotProfessional />
-            </div>
+            {!isMobile ? (
+              <div className="w-full max-w-4xl h-[500px]">
+                <SplineRobotProfessional />
+              </div>
+            ) : (
+              <div className="w-full max-w-4xl min-h-[400px] flex flex-col items-center justify-center text-center px-6 py-12 bg-slate-800/50 rounded-2xl border border-slate-700">
+                <div className="relative mb-6">
+                  <div className="absolute inset-0 bg-blue-500/20 blur-2xl rounded-full"></div>
+                  <Bot className="w-24 h-24 text-blue-400 relative z-10 animate-bounce" />
+                </div>
+                <h3 className="text-2xl font-bold text-white mb-4">{t('interactive.mobileTitle')}</h3>
+                <p className="text-slate-300 max-w-md leading-relaxed">
+                  {t('interactive.mobileMessage')}
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </section>
@@ -205,7 +230,25 @@ export default function Home() {
               }
             ].map((app, index) => (
               <div key={index} className="group">
-                <SplineAppCard />
+                {!isMobile ? (
+                  <SplineAppCard />
+                ) : (
+                  <div className="h-full min-h-[320px] p-8 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-gray-200 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 flex flex-col items-center justify-center text-center">
+                    <div className="relative mb-6">
+                      <div className="absolute inset-0 bg-blue-400/20 blur-xl rounded-full"></div>
+                      <Bot className="w-16 h-16 text-blue-600 relative z-10" />
+                    </div>
+                    <h3 className="font-bold text-xl text-gray-900 mb-3">{app.title}</h3>
+                    <p className="text-sm text-gray-600 leading-relaxed mb-4">{app.desc}</p>
+                    <div className="flex flex-wrap gap-2 justify-center">
+                      {app.tags.map((tag) => (
+                        <span key={tag} className="px-3 py-1 bg-white text-blue-600 text-xs font-medium rounded-full border border-blue-200">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             ))}
           </div>
