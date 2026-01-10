@@ -49,7 +49,8 @@ import {
   Play,
   Terminal,
   Video,
-  Sparkles
+  Sparkles,
+  FileText
 } from "lucide-react";
 import { useLanguage } from "@/lib/i18n-context";
 
@@ -234,7 +235,7 @@ export default function Home() {
               {
                 title: t('apps.app4.title'),
                 desc: t('apps.app4.desc'),
-                tags: ["AI Workflow", "Automation", "Google Opal"],
+                tags: ["Content Creation", "AI Writing", "Blog Generation"],
                 url: "https://opal.google/?flow=drive:/1d99AfQwquu7yl5MfAPm0nnP7Una_L8H8&shared&mode=app"
               }
             ].map((app, index) => (
@@ -263,7 +264,7 @@ export default function Home() {
                       <div className="h-full min-h-[320px] p-8 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-gray-200 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 flex flex-col items-center justify-center text-center cursor-pointer">
                         <div className="relative mb-6">
                           <div className="absolute inset-0 bg-blue-400/20 blur-xl rounded-full"></div>
-                          <Zap className="w-16 h-16 text-blue-600 relative z-10" />
+                          <FileText className="w-16 h-16 text-blue-600 relative z-10" />
                         </div>
                         <h3 className="font-bold text-xl text-gray-900 mb-3">{app.title}</h3>
                         <p className="text-sm text-gray-600 leading-relaxed mb-4">{app.desc}</p>
@@ -275,7 +276,7 @@ export default function Home() {
                           ))}
                         </div>
                         <div className="mt-4 flex items-center gap-2 text-blue-600 font-medium text-sm">
-                          <span>Launch Workflow</span>
+                          <span>Start Writing</span>
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                           </svg>
