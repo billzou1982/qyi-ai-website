@@ -216,38 +216,89 @@ export default function Home() {
               {
                 title: t('apps.app1.title'),
                 desc: t('apps.app1.desc'),
-                tags: ["NLP", "Computer Vision", "Cloud"]
+                tags: ["NLP", "Computer Vision", "Cloud"],
+                url: null
               },
               {
                 title: t('apps.app2.title'),
                 desc: t('apps.app2.desc'),
-                tags: ["Generative AI", "Deep Learning", "API"]
+                tags: ["Generative AI", "Deep Learning", "API"],
+                url: null
               },
               {
                 title: t('apps.app3.title'),
                 desc: t('apps.app3.desc'),
-                tags: ["ML", "Data Science", "React"]
+                tags: ["ML", "Data Science", "React"],
+                url: null
+              },
+              {
+                title: t('apps.app4.title'),
+                desc: t('apps.app4.desc'),
+                tags: ["AI Workflow", "Automation", "Google Opal"],
+                url: "https://opal.google/?flow=drive:/1d99AfQwquu7yl5MfAPm0nnP7Una_L8H8&shared&mode=app"
               }
             ].map((app, index) => (
               <div key={index} className="group">
                 {!isMobile ? (
-                  <SplineAppCard />
+                  app.url ? (
+                    <a
+                      href={app.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block h-full"
+                    >
+                      <SplineAppCard />
+                    </a>
+                  ) : (
+                    <SplineAppCard />
+                  )
                 ) : (
-                  <div className="h-full min-h-[320px] p-8 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-gray-200 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 flex flex-col items-center justify-center text-center">
-                    <div className="relative mb-6">
-                      <div className="absolute inset-0 bg-blue-400/20 blur-xl rounded-full"></div>
-                      <Bot className="w-16 h-16 text-blue-600 relative z-10" />
+                  app.url ? (
+                    <a
+                      href={app.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block h-full"
+                    >
+                      <div className="h-full min-h-[320px] p-8 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-gray-200 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 flex flex-col items-center justify-center text-center cursor-pointer">
+                        <div className="relative mb-6">
+                          <div className="absolute inset-0 bg-blue-400/20 blur-xl rounded-full"></div>
+                          <Zap className="w-16 h-16 text-blue-600 relative z-10" />
+                        </div>
+                        <h3 className="font-bold text-xl text-gray-900 mb-3">{app.title}</h3>
+                        <p className="text-sm text-gray-600 leading-relaxed mb-4">{app.desc}</p>
+                        <div className="flex flex-wrap gap-2 justify-center">
+                          {app.tags.map((tag) => (
+                            <span key={tag} className="px-3 py-1 bg-white text-blue-600 text-xs font-medium rounded-full border border-blue-200">
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                        <div className="mt-4 flex items-center gap-2 text-blue-600 font-medium text-sm">
+                          <span>Launch Workflow</span>
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                          </svg>
+                        </div>
+                      </div>
+                    </a>
+                  ) : (
+                    <div className="h-full min-h-[320px] p-8 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-gray-200 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 flex flex-col items-center justify-center text-center">
+                      <div className="relative mb-6">
+                        <div className="absolute inset-0 bg-blue-400/20 blur-xl rounded-full"></div>
+                        <Bot className="w-16 h-16 text-blue-600 relative z-10" />
+                      </div>
+                      <h3 className="font-bold text-xl text-gray-900 mb-3">{app.title}</h3>
+                      <p className="text-sm text-gray-600 leading-relaxed mb-4">{app.desc}</p>
+                      <div className="flex flex-wrap gap-2 justify-center">
+                        {app.tags.map((tag) => (
+                          <span key={tag} className="px-3 py-1 bg-white text-blue-600 text-xs font-medium rounded-full border border-blue-200">
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
                     </div>
-                    <h3 className="font-bold text-xl text-gray-900 mb-3">{app.title}</h3>
-                    <p className="text-sm text-gray-600 leading-relaxed mb-4">{app.desc}</p>
-                    <div className="flex flex-wrap gap-2 justify-center">
-                      {app.tags.map((tag) => (
-                        <span key={tag} className="px-3 py-1 bg-white text-blue-600 text-xs font-medium rounded-full border border-blue-200">
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
+                  )
                 )}
               </div>
             ))}

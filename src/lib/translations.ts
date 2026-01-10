@@ -45,6 +45,10 @@ export const translations = {
         title: "Predictive Analytics Dashboard",
         desc: "Real-time insights and forecasting using machine learning algorithms",
       },
+      app4: {
+        title: "Opal AI Workflow",
+        desc: "Interactive AI-powered workflow automation with Google Opal - streamline your tasks with intelligent processing",
+      },
       splineCard: {
         title: "AI 3D Scene Generator",
         desc: "Generate and customize 3D scenes using advanced AI algorithms and interactive controls",
@@ -152,6 +156,10 @@ export const translations = {
       app3: {
         title: "预测分析仪表盘",
         desc: "利用机器学习算法提供实时洞察和预测",
+      },
+      app4: {
+        title: "Opal AI 工作流",
+        desc: "基于 Google Opal 的交互式 AI 工作流自动化 - 用智能处理简化您的任务",
       },
       splineCard: {
         title: "AI 3D 场景生成器",
