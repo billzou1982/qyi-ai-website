@@ -218,25 +218,30 @@ export default function Home() {
                 title: t('apps.app1.title'),
                 desc: t('apps.app1.desc'),
                 tags: ["NLP", "Computer Vision", "Cloud"],
+                features: ["• Multi-format document support", "• Intelligent key info extraction", "• Automated summarization"],
                 url: null
               },
               {
                 title: t('apps.app2.title'),
                 desc: t('apps.app2.desc'),
                 tags: ["Generative AI", "Deep Learning", "API"],
+                features: ["• Text-to-image generation", "• Style customization", "• High-resolution output"],
                 url: null
               },
               {
                 title: t('apps.app3.title'),
                 desc: t('apps.app3.desc'),
                 tags: ["ML", "Data Science", "React"],
+                features: ["• Real-time data visualization", "• Predictive forecasting", "• Custom ML models"],
                 url: null
               },
               {
                 title: t('apps.app4.title'),
                 desc: t('apps.app4.desc'),
                 tags: ["Content Creation", "AI Writing", "Blog Generation"],
-                url: "https://opal.google/?flow=drive:/1d99AfQwquu7yl5MfAPm0nnP7Una_L8H8&shared&mode=app"
+                features: ["• AI-powered content generation", "• SEO-optimized articles", "• Multi-language support"],
+                url: "https://opal.google/?flow=drive:/1d99AfQwquu7yl5MfAPm0nnP7Una_L8H8&shared&mode=app",
+                icon: <FileText className="w-8 h-8 text-white" />
               }
             ].map((app, index) => (
               <div key={index} className="group">
@@ -248,10 +253,22 @@ export default function Home() {
                       rel="noopener noreferrer"
                       className="block h-full"
                     >
-                      <SplineAppCard />
+                      <SplineAppCard
+                        title={app.title}
+                        description={app.desc}
+                        tags={app.tags}
+                        features={app.features}
+                        icon={app.icon}
+                      />
                     </a>
                   ) : (
-                    <SplineAppCard />
+                    <SplineAppCard
+                      title={app.title}
+                      description={app.desc}
+                      tags={app.tags}
+                      features={app.features}
+                      icon={app.icon}
+                    />
                   )
                 ) : (
                   app.url ? (
