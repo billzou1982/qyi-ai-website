@@ -4,11 +4,27 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useLanguage } from '@/lib/i18n-context';
+import { useTheme } from '@/lib/theme-context';
+import { Sun, Moon, Monitor } from 'lucide-react';
 
 export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { language, toggleLanguage, t } = useLanguage();
+  const { theme, setTheme } = useTheme();
+
+  const cycleTheme = () => {
+    const themes: Array<'light' | 'dark' | 'system'> = ['light', 'dark', 'system'];
+    const currentIndex = themes.indexOf(theme);
+    const nextIndex = (currentIndex + 1) % themes.length;
+    setTheme(themes[nextIndex]);
+  };
+
+  const getThemeIcon = () => {
+    if (theme === 'light') return <Sun className="w-4 h-4" />;
+    if (theme === 'dark') return <Moon className="w-4 h-4" />;
+    return <Monitor className="w-4 h-4" />;
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -37,8 +53,8 @@ export function Navbar() {
 
   return (
     <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${isScrolled
-      ? 'bg-white/95 backdrop-blur-md shadow-lg border-b border-gray-200'
-      : 'bg-white/90 backdrop-blur-md border-b border-gray-100'
+      ? 'bg-white/95 dark:bg-slate-900/95 backdrop-blur-md shadow-lg border-b border-gray-200 dark:border-gray-700'
+      : 'bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-gray-100 dark:border-gray-800'
       }`}>
       <div className="w-full px-4 md:px-8">
         <div className="flex justify-between items-center h-16">
@@ -47,7 +63,7 @@ export function Navbar() {
             <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-700 rounded-xl flex items-center justify-center text-white font-bold text-lg">
               ⚡
             </div>
-            <span className="text-xl font-bold text-gray-900">QYI AI</span>
+            <span className="text-xl font-bold text-gray-900 dark:text-white">QYI AI</span>
           </Link>
 
           {/* Navigation Links */}
@@ -69,55 +85,72 @@ export function Navbar() {
 
             <button
               onClick={() => scrollToSection('about')}
-              className="text-gray-600 hover:text-blue-500 font-medium transition-colors"
+              className="text-gray-600 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-400 font-medium transition-colors"
             >
               {t('nav.about')}
             </button>
             <button
               onClick={() => scrollToSection('apps')}
-              className="text-gray-600 hover:text-blue-500 font-medium transition-colors"
+              className="text-gray-600 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-400 font-medium transition-colors"
             >
               {t('nav.apps')}
             </button>
             <Link
               href="/ai-tools"
-              className="text-gray-600 hover:text-blue-500 font-medium transition-colors"
+              className="text-gray-600 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-400 font-medium transition-colors"
             >
               {t('nav.aiTools')}
             </Link>
             <button
               onClick={() => scrollToSection('video-tutorials')}
-              className="text-gray-600 hover:text-blue-500 font-medium transition-colors"
+              className="text-gray-600 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-400 font-medium transition-colors"
             >
               {t('nav.blog')}
             </button>
             <button
               onClick={() => scrollToSection('contact')}
-              className="text-gray-600 hover:text-blue-500 font-medium transition-colors"
+              className="text-gray-600 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-400 font-medium transition-colors"
             >
               {t('nav.contact')}
+            </button>
+
+            {/* Theme Toggle */}
+            <button
+              onClick={cycleTheme}
+              className="bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 p-2 rounded-lg transition-colors"
+              aria-label="Toggle theme"
+              title={`Current theme: ${theme}`}
+            >
+              {getThemeIcon()}
             </button>
 
             {/* Language Toggle */}
             <button
               onClick={toggleLanguage}
-              className="bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg text-sm font-medium transition-colors min-w-[60px]"
+              className="bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors min-w-[60px]"
             >
               {language}
             </button>
           </div>
 
           {/* Mobile Menu Button */}
-          <div className="md:hidden flex items-center gap-4">
+          <div className="md:hidden flex items-center gap-2">
+            <button
+              onClick={cycleTheme}
+              className="bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 p-2 rounded-lg transition-colors"
+              aria-label="Toggle theme"
+            >
+              {getThemeIcon()}
+            </button>
             <button
               onClick={toggleLanguage}
-              className="bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
+              className="bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
             >
               {language}
             </button>
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 text-gray-600 hover:text-gray-900 transition-colors"
+              className="p-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
               aria-label="Toggle mobile menu"
               aria-expanded={mobileMenuOpen}
             >
@@ -136,7 +169,7 @@ export function Navbar() {
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden border-t border-gray-200 bg-white/95 backdrop-blur-md animate-fade-in">
+          <div className="md:hidden border-t border-gray-200 dark:border-gray-700 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md animate-fade-in">
             <div className="py-4 space-y-1">
               {/* Academy link in mobile menu - highlighted */}
               <a
@@ -151,32 +184,32 @@ export function Navbar() {
 
               <button
                 onClick={() => scrollToSection('about')}
-                className="w-full text-left px-4 py-3 text-gray-600 hover:bg-gray-50 hover:text-blue-500 font-medium transition-colors"
+                className="w-full text-left px-4 py-3 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-blue-500 dark:hover:text-blue-400 font-medium transition-colors"
               >
                 {t('nav.about')}
               </button>
               <button
                 onClick={() => scrollToSection('apps')}
-                className="w-full text-left px-4 py-3 text-gray-600 hover:bg-gray-50 hover:text-blue-500 font-medium transition-colors"
+                className="w-full text-left px-4 py-3 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-blue-500 dark:hover:text-blue-400 font-medium transition-colors"
               >
                 {t('nav.apps')}
               </button>
               <Link
                 href="/ai-tools"
                 onClick={() => setMobileMenuOpen(false)}
-                className="block px-4 py-3 text-gray-600 hover:bg-gray-50 hover:text-blue-500 font-medium transition-colors"
+                className="block px-4 py-3 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-blue-500 dark:hover:text-blue-400 font-medium transition-colors"
               >
                 {t('nav.aiTools')}
               </Link>
               <button
                 onClick={() => scrollToSection('video-tutorials')}
-                className="w-full text-left px-4 py-3 text-gray-600 hover:bg-gray-50 hover:text-blue-500 font-medium transition-colors"
+                className="w-full text-left px-4 py-3 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-blue-500 dark:hover:text-blue-400 font-medium transition-colors"
               >
                 {t('nav.blog')}
               </button>
               <button
                 onClick={() => scrollToSection('contact')}
-                className="w-full text-left px-4 py-3 text-gray-600 hover:bg-gray-50 hover:text-blue-500 font-medium transition-colors"
+                className="w-full text-left px-4 py-3 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-blue-500 dark:hover:text-blue-400 font-medium transition-colors"
               >
                 {t('nav.contact')}
               </button>

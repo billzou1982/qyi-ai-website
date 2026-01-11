@@ -127,26 +127,26 @@ export default function Home() {
       </section>
 
       {/* About Section */}
-      <section id="about" className="py-24 bg-slate-50 relative overflow-hidden">
+      <section id="about" className="py-24 bg-slate-50 dark:bg-slate-900 relative overflow-hidden">
         {/* Decorative background element */}
-        <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-slate-300 to-transparent opacity-50"></div>
+        <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-slate-300 dark:via-slate-700 to-transparent opacity-50"></div>
 
         <div className="max-w-6xl mx-auto px-6 relative z-10">
           <div className="text-center mb-20">
-            <h2 className="text-3xl md:text-5xl font-bold mb-6 text-slate-900 tracking-tight">{t('about.title')}</h2>
+            <h2 className="text-3xl md:text-5xl font-bold mb-6 text-slate-900 dark:text-white tracking-tight">{t('about.title')}</h2>
             <div className="flex justify-center mb-10">
               <div className="relative group">
                 <div className="absolute inset-0 bg-blue-500/20 blur-xl rounded-full group-hover:bg-blue-500/30 transition-all duration-500"></div>
-                <div className="relative w-24 h-24 bg-gradient-to-br from-white to-gray-100 rounded-2xl shadow-lg flex items-center justify-center border border-gray-200 group-hover:scale-105 transition-transform duration-500">
-                  <Bot className="w-12 h-12 text-blue-600" />
+                <div className="relative w-24 h-24 bg-gradient-to-br from-white to-gray-100 dark:from-slate-800 dark:to-slate-700 rounded-2xl shadow-lg flex items-center justify-center border border-gray-200 dark:border-gray-600 group-hover:scale-105 transition-transform duration-500">
+                  <Bot className="w-12 h-12 text-blue-600 dark:text-blue-400" />
                 </div>
                 <div className="absolute -top-3 -right-3 w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg rotate-12 group-hover:rotate-0 transition-all duration-300">
                   <Zap className="w-5 h-5 fill-current" />
                 </div>
               </div>
             </div>
-            <h3 className="text-2xl font-bold text-gray-900 mb-4">{t('about.role')}</h3>
-            <div className="max-w-3xl mx-auto space-y-4 text-gray-600 text-lg leading-relaxed">
+            <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">{t('about.role')}</h3>
+            <div className="max-w-3xl mx-auto space-y-4 text-gray-600 dark:text-gray-300 text-lg leading-relaxed">
               <p>
                 {t('about.desc1')}
               </p>
@@ -162,8 +162,8 @@ export default function Home() {
                 "Python", "TensorFlow", "PyTorch", "React", "Next.js", "Node.js",
                 "AWS", "Docker", "Kubernetes"
               ].map((skill) => (
-                <span key={skill} className="px-5 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl text-sm font-medium hover:border-blue-400 hover:text-blue-600 hover:shadow-md transition-all duration-300 cursor-default flex items-center gap-2 group">
-                  <span className="w-1.5 h-1.5 rounded-full bg-blue-400 group-hover:bg-blue-600 transition-colors"></span>
+                <span key={skill} className="px-5 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 rounded-xl text-sm font-medium hover:border-blue-400 dark:hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-400 hover:shadow-md transition-all duration-300 cursor-default flex items-center gap-2 group">
+                  <span className="w-1.5 h-1.5 rounded-full bg-blue-400 group-hover:bg-blue-600 dark:group-hover:bg-blue-400 transition-colors"></span>
                   {skill}
                 </span>
               ))}
@@ -203,11 +203,11 @@ export default function Home() {
       </section>
 
       {/* Web Applications Section */}
-      <section id="apps" className="py-24 bg-white">
+      <section id="apps" className="py-24 bg-white dark:bg-slate-950">
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-20">
-            <h2 className="text-3xl md:text-5xl font-bold mb-6 text-slate-900 tracking-tight">{t('apps.title')}</h2>
-            <p className="text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed">
+            <h2 className="text-3xl md:text-5xl font-bold mb-6 text-slate-900 dark:text-white tracking-tight">{t('apps.title')}</h2>
+            <p className="text-xl text-slate-600 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed">
               {t('apps.subtitle')}
             </p>
           </div>
@@ -302,45 +302,45 @@ export default function Home() {
       </section>
 
       {/* Article & Video Section */}
-      <section className="py-24 bg-slate-50">
+      <section className="py-24 bg-slate-50 dark:bg-slate-900">
         <div className="max-w-6xl mx-auto px-6">
           <div className="grid md:grid-cols-2 gap-16">
             {/* Articles */}
             <div>
-              <h3 className="text-2xl font-bold mb-8 text-slate-900 flex items-center gap-3">
-                <span className="p-2 bg-blue-100 rounded-lg text-blue-600"><Terminal size={24} /></span>
+              <h3 className="text-2xl font-bold mb-8 text-slate-900 dark:text-white flex items-center gap-3">
+                <span className="p-2 bg-blue-100 dark:bg-blue-900/50 rounded-lg text-blue-600 dark:text-blue-400"><Terminal size={24} /></span>
                 {t('articles.title')}
               </h3>
               <div className="space-y-8">
-                <div className="group p-6 bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1">
+                <div className="group p-6 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1">
                   <div className="flex items-center gap-3 mb-3">
-                    <span className="px-3 py-1 bg-blue-50 text-blue-600 text-xs font-bold rounded-full uppercase tracking-wide">{t('articles.art1.tag')}</span>
-                    <span className="text-slate-400 text-xs">Dec 2024</span>
+                    <span className="px-3 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs font-bold rounded-full uppercase tracking-wide">{t('articles.art1.tag')}</span>
+                    <span className="text-slate-400 dark:text-slate-500 text-xs">Dec 2024</span>
                   </div>
-                  <h4 className="font-bold text-xl text-slate-900 mb-3 group-hover:text-blue-600 transition-colors">{t('articles.art1.title')}</h4>
-                  <p className="text-slate-600 leading-relaxed">
+                  <h4 className="font-bold text-xl text-slate-900 dark:text-white mb-3 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{t('articles.art1.title')}</h4>
+                  <p className="text-slate-600 dark:text-gray-300 leading-relaxed">
                     {t('articles.art1.desc')}
                   </p>
                 </div>
 
-                <div className="group p-6 bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1">
+                <div className="group p-6 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1">
                   <div className="flex items-center gap-3 mb-3">
-                    <span className="px-3 py-1 bg-purple-50 text-purple-600 text-xs font-bold rounded-full uppercase tracking-wide">{t('articles.art2.tag')}</span>
-                    <span className="text-slate-400 text-xs">Nov 2024</span>
+                    <span className="px-3 py-1 bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 text-xs font-bold rounded-full uppercase tracking-wide">{t('articles.art2.tag')}</span>
+                    <span className="text-slate-400 dark:text-slate-500 text-xs">Nov 2024</span>
                   </div>
-                  <h4 className="font-bold text-xl text-slate-900 mb-3 group-hover:text-purple-600 transition-colors">{t('articles.art2.title')}</h4>
-                  <p className="text-slate-600 leading-relaxed">
+                  <h4 className="font-bold text-xl text-slate-900 dark:text-white mb-3 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">{t('articles.art2.title')}</h4>
+                  <p className="text-slate-600 dark:text-gray-300 leading-relaxed">
                     {t('articles.art2.desc')}
                   </p>
                 </div>
 
-                <div className="group p-6 bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1">
+                <div className="group p-6 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1">
                   <div className="flex items-center gap-3 mb-3">
-                    <span className="px-3 py-1 bg-green-50 text-green-600 text-xs font-bold rounded-full uppercase tracking-wide">{t('articles.art3.tag')}</span>
-                    <span className="text-slate-400 text-xs">Oct 2024</span>
+                    <span className="px-3 py-1 bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 text-xs font-bold rounded-full uppercase tracking-wide">{t('articles.art3.tag')}</span>
+                    <span className="text-slate-400 dark:text-slate-500 text-xs">Oct 2024</span>
                   </div>
-                  <h4 className="font-bold text-xl text-slate-900 mb-3 group-hover:text-green-600 transition-colors">{t('articles.art3.title')}</h4>
-                  <p className="text-slate-600 leading-relaxed">
+                  <h4 className="font-bold text-xl text-slate-900 dark:text-white mb-3 group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">{t('articles.art3.title')}</h4>
+                  <p className="text-slate-600 dark:text-gray-300 leading-relaxed">
                     {t('articles.art3.desc')}
                   </p>
                 </div>
@@ -349,13 +349,13 @@ export default function Home() {
 
             {/* Video Content */}
             <div id="video-tutorials">
-              <h3 className="text-2xl font-bold mb-8 text-slate-900 flex items-center gap-3">
-                <span className="p-2 bg-red-100 rounded-lg text-red-600"><Video size={24} /></span>
+              <h3 className="text-2xl font-bold mb-8 text-slate-900 dark:text-white flex items-center gap-3">
+                <span className="p-2 bg-red-100 dark:bg-red-900/50 rounded-lg text-red-600 dark:text-red-400"><Video size={24} /></span>
                 {t('videos.title')}
               </h3>
               <div className="space-y-8">
                 {/* Video Card 1 */}
-                <div className="bg-white rounded-xl border border-gray-200 hover:shadow-lg transition-all duration-300 overflow-hidden">
+                <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 hover:shadow-lg transition-all duration-300 overflow-hidden">
                   <div className="relative">
                     {/* Video Thumbnail */}
                     <div className="aspect-video bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900 flex items-center justify-center relative">
@@ -371,15 +371,15 @@ export default function Home() {
                     </div>
                     {/* Video Info */}
                     <div className="p-4">
-                      <h4 className="font-bold text-lg mb-2 text-gray-900">{t('videos.vid1.title')}</h4>
-                      <div className="text-sm text-gray-500 mb-2">15K views • 2 days ago</div>
-                      <p className="text-gray-600 text-sm">{t('videos.vid1.desc')}</p>
+                      <h4 className="font-bold text-lg mb-2 text-gray-900 dark:text-white">{t('videos.vid1.title')}</h4>
+                      <div className="text-sm text-gray-500 dark:text-gray-400 mb-2">15K views • 2 days ago</div>
+                      <p className="text-gray-600 dark:text-gray-300 text-sm">{t('videos.vid1.desc')}</p>
                     </div>
                   </div>
                 </div>
 
                 {/* Video Card 2 */}
-                <div className="bg-white rounded-xl border border-gray-200 hover:shadow-lg transition-all duration-300 overflow-hidden">
+                <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 hover:shadow-lg transition-all duration-300 overflow-hidden">
                   <div className="relative">
                     {/* Video Thumbnail */}
                     <div className="aspect-video bg-gradient-to-br from-green-900 via-teal-900 to-cyan-900 flex items-center justify-center relative">
@@ -395,15 +395,15 @@ export default function Home() {
                     </div>
                     {/* Video Info */}
                     <div className="p-4">
-                      <h4 className="font-bold text-lg mb-2 text-gray-900">{t('videos.vid2.title')}</h4>
-                      <div className="text-sm text-gray-500 mb-2">8.2K views • 1 week ago</div>
-                      <p className="text-gray-600 text-sm">{t('videos.vid2.desc')}</p>
+                      <h4 className="font-bold text-lg mb-2 text-gray-900 dark:text-white">{t('videos.vid2.title')}</h4>
+                      <div className="text-sm text-gray-500 dark:text-gray-400 mb-2">8.2K views • 1 week ago</div>
+                      <p className="text-gray-600 dark:text-gray-300 text-sm">{t('videos.vid2.desc')}</p>
                     </div>
                   </div>
                 </div>
 
                 {/* Video Card 3 */}
-                <div className="bg-white rounded-xl border border-gray-200 hover:shadow-lg transition-all duration-300 overflow-hidden">
+                <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 hover:shadow-lg transition-all duration-300 overflow-hidden">
                   <div className="relative">
                     {/* Video Thumbnail */}
                     <div className="aspect-video bg-gradient-to-br from-orange-900 via-red-900 to-pink-900 flex items-center justify-center relative">
@@ -419,16 +419,16 @@ export default function Home() {
                     </div>
                     {/* Video Info */}
                     <div className="p-4">
-                      <h4 className="font-bold text-lg mb-2 text-gray-900">{t('videos.vid3.title')}</h4>
-                      <div className="text-sm text-gray-500 mb-2">12K views • 2 weeks ago</div>
-                      <p className="text-gray-600 text-sm">{t('videos.vid3.desc')}</p>
+                      <h4 className="font-bold text-lg mb-2 text-gray-900 dark:text-white">{t('videos.vid3.title')}</h4>
+                      <div className="text-sm text-gray-500 dark:text-gray-400 mb-2">12K views • 2 weeks ago</div>
+                      <p className="text-gray-600 dark:text-gray-300 text-sm">{t('videos.vid3.desc')}</p>
                     </div>
                   </div>
                 </div>
               </div>
               <div className="mt-6">
                 <a href="https://youtube.com/@qyi-ai" target="_blank" rel="noopener noreferrer"
-                  className="text-blue-500 font-medium hover:text-blue-600">
+                  className="text-blue-500 dark:text-blue-400 font-medium hover:text-blue-600 dark:hover:text-blue-300">
                   {t('videos.subscribe')}
                 </a>
               </div>
