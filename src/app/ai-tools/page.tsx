@@ -47,7 +47,7 @@ export default function AiToolsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-slate-950">
       <Navbar />
 
       <main className="pt-24 pb-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -55,7 +55,7 @@ export default function AiToolsPage() {
           {/* Sidebar Navigation - Sticky */}
           <aside className="lg:w-64 flex-shrink-0 hidden lg:block h-[calc(100vh-6rem)] sticky top-24 overflow-y-auto pr-2">
             <div className="space-y-1">
-              <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4 px-3">
+              <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4 px-3">
                 {t('toolsPage.categories')}
               </h3>
               {toolsData.map((category) => (
@@ -63,8 +63,8 @@ export default function AiToolsPage() {
                   key={category.id}
                   onClick={() => scrollToCategory(category.id)}
                   className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors ${activeCategory === category.id
-                    ? "bg-blue-50 text-blue-700 border-l-4 border-blue-600"
-                    : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 border-l-4 border-transparent"
+                    ? "bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border-l-4 border-blue-600 dark:border-blue-500"
+                    : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-gray-900 dark:hover:text-white border-l-4 border-transparent"
                     }`}
                 >
                   {language === 'CN' ? category.name_cn || category.name : category.name}
@@ -74,11 +74,11 @@ export default function AiToolsPage() {
           </aside>
 
           {/* Mobile Category Select */}
-          <div className="lg:hidden mb-6 sticky top-20 z-40 bg-gray-50 py-2">
+          <div className="lg:hidden mb-6 sticky top-20 z-40 bg-gray-50 dark:bg-slate-950 py-2">
             <select
               value={activeCategory}
               onChange={(e) => scrollToCategory(e.target.value)}
-              className="w-full p-3 rounded-lg border border-gray-200 bg-white shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full p-3 rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 dark:text-white shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
               {toolsData.map((category) => (
                 <option key={category.id} value={category.id}>
@@ -91,10 +91,10 @@ export default function AiToolsPage() {
           {/* Main Content */}
           <div className="flex-1 space-y-16">
             <div className="text-center lg:text-left mb-10">
-              <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
                 {t('toolsPage.title')}
               </h1>
-              <p className="text-lg text-gray-600 max-w-2xl">
+              <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl">
                 {t('toolsPage.subtitle')}
               </p>
             </div>
@@ -105,14 +105,14 @@ export default function AiToolsPage() {
                 id={category.id}
                 className="scroll-mt-24"
               >
-                <div className="mb-6 border-b border-gray-200 pb-4">
-                  <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
+                <div className="mb-6 border-b border-gray-200 dark:border-slate-700 pb-4">
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
                     {language === 'CN' ? category.name_cn || category.name : category.name}
-                    <span className="text-sm font-normal text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+                    <span className="text-sm font-normal text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-slate-800 px-2 py-1 rounded-full">
                       {category.tools.length}
                     </span>
                   </h2>
-                  <p className="text-gray-500 mt-1">{language === 'CN' ? category.description_cn || category.description : category.description}</p>
+                  <p className="text-gray-500 dark:text-gray-400 mt-1">{language === 'CN' ? category.description_cn || category.description : category.description}</p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -143,16 +143,16 @@ function ToolCard({ tool, language, t }: { tool: Tool, language: string, t: (key
       whileHover={{ y: -4 }}
       transition={{ duration: 0.2 }}
     >
-      <div className="bg-white rounded-xl border border-gray-200 p-5 h-full hover:shadow-lg transition-all duration-300 relative overflow-hidden flex flex-col">
+      <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-5 h-full hover:shadow-lg dark:hover:shadow-blue-500/10 transition-all duration-300 relative overflow-hidden flex flex-col">
         {/* Badges */}
         <div className="absolute top-3 right-3 flex gap-2">
           {tool.isHot && (
-            <span className="bg-red-50 text-red-600 text-xs font-bold px-2 py-1 rounded-full flex items-center gap-1 border border-red-100">
+            <span className="bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-xs font-bold px-2 py-1 rounded-full flex items-center gap-1 border border-red-100 dark:border-red-800">
               {t('toolsPage.hot')}
             </span>
           )}
           {tool.isNew && (
-            <span className="bg-green-50 text-green-600 text-xs font-bold px-2 py-1 rounded-full flex items-center gap-1 border border-green-100">
+            <span className="bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 text-xs font-bold px-2 py-1 rounded-full flex items-center gap-1 border border-green-100 dark:border-green-800">
               {t('toolsPage.new')}
             </span>
           )}
@@ -160,19 +160,19 @@ function ToolCard({ tool, language, t }: { tool: Tool, language: string, t: (key
 
         <div className="flex items-start gap-4 mb-3">
           {/* Icon Placeholder - Generated from Name */}
-          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center text-lg flex-shrink-0 border border-blue-100 font-bold text-blue-600">
+          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 flex items-center justify-center text-lg flex-shrink-0 border border-blue-100 dark:border-blue-800 font-bold text-blue-600 dark:text-blue-400">
             {displayName.charAt(0)}
           </div>
 
           <div className="flex-1 min-w-0 pt-0.5">
-            <h3 className="font-bold text-gray-900 truncate group-hover:text-blue-600 transition-colors">
+            <h3 className="font-bold text-gray-900 dark:text-white truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
               {displayName}
             </h3>
             <div className="flex flex-wrap gap-1 mt-1.5">
               {displayTags?.slice(0, 2).map((tag) => (
                 <span
                   key={tag}
-                  className="text-[10px] text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded border border-gray-200"
+                  className="text-[10px] text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-slate-700 px-1.5 py-0.5 rounded border border-gray-200 dark:border-slate-600"
                 >
                   {tag}
                 </span>
@@ -181,15 +181,15 @@ function ToolCard({ tool, language, t }: { tool: Tool, language: string, t: (key
           </div>
         </div>
 
-        <p className="text-sm text-gray-600 line-clamp-2 leading-relaxed mb-4 flex-grow">
+        <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-2 leading-relaxed mb-4 flex-grow">
           {displayDesc}
         </p>
 
-        <div className="mt-auto pt-3 border-t border-gray-50 flex justify-between items-center">
-          <span className="text-xs text-gray-400">
+        <div className="mt-auto pt-3 border-t border-gray-50 dark:border-slate-700 flex justify-between items-center">
+          <span className="text-xs text-gray-400 dark:text-gray-500">
             {new URL(tool.url).hostname.replace('www.', '')}
           </span>
-          <span className="text-xs text-blue-500 font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform translate-x-2 group-hover:translate-x-0">
+          <span className="text-xs text-blue-500 dark:text-blue-400 font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform translate-x-2 group-hover:translate-x-0">
             {t('toolsPage.visitWebsite')} →
           </span>
         </div>
