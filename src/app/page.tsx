@@ -127,26 +127,26 @@ export default function Home() {
       </section>
 
       {/* About Section */}
-      <section id="about" className="py-24 bg-slate-50 relative overflow-hidden">
+      <section id="about" className="py-24 bg-slate-50 dark:bg-slate-900 relative overflow-hidden">
         {/* Decorative background element */}
-        <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-slate-300 to-transparent opacity-50"></div>
+        <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-slate-300 dark:via-slate-700 to-transparent opacity-50"></div>
 
         <div className="max-w-6xl mx-auto px-6 relative z-10">
           <div className="text-center mb-20">
-            <h2 className="text-3xl md:text-5xl font-bold mb-6 text-slate-900 tracking-tight">{t('about.title')}</h2>
+            <h2 className="text-3xl md:text-5xl font-bold mb-6 text-slate-900 dark:text-white tracking-tight">{t('about.title')}</h2>
             <div className="flex justify-center mb-10">
               <div className="relative group">
                 <div className="absolute inset-0 bg-blue-500/20 blur-xl rounded-full group-hover:bg-blue-500/30 transition-all duration-500"></div>
-                <div className="relative w-24 h-24 bg-gradient-to-br from-white to-gray-100 rounded-2xl shadow-lg flex items-center justify-center border border-gray-200 group-hover:scale-105 transition-transform duration-500">
-                  <Bot className="w-12 h-12 text-blue-600" />
+                <div className="relative w-24 h-24 bg-gradient-to-br from-white to-gray-100 dark:from-slate-800 dark:to-slate-700 rounded-2xl shadow-lg flex items-center justify-center border border-gray-200 dark:border-gray-600 group-hover:scale-105 transition-transform duration-500">
+                  <Bot className="w-12 h-12 text-blue-600 dark:text-blue-400" />
                 </div>
                 <div className="absolute -top-3 -right-3 w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg rotate-12 group-hover:rotate-0 transition-all duration-300">
                   <Zap className="w-5 h-5 fill-current" />
                 </div>
               </div>
             </div>
-            <h3 className="text-2xl font-bold text-gray-900 mb-4">{t('about.role')}</h3>
-            <div className="max-w-3xl mx-auto space-y-4 text-gray-600 text-lg leading-relaxed">
+            <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">{t('about.role')}</h3>
+            <div className="max-w-3xl mx-auto space-y-4 text-gray-600 dark:text-gray-300 text-lg leading-relaxed">
               <p>
                 {t('about.desc1')}
               </p>
@@ -162,8 +162,8 @@ export default function Home() {
                 "Python", "TensorFlow", "PyTorch", "React", "Next.js", "Node.js",
                 "AWS", "Docker", "Kubernetes"
               ].map((skill) => (
-                <span key={skill} className="px-5 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl text-sm font-medium hover:border-blue-400 hover:text-blue-600 hover:shadow-md transition-all duration-300 cursor-default flex items-center gap-2 group">
-                  <span className="w-1.5 h-1.5 rounded-full bg-blue-400 group-hover:bg-blue-600 transition-colors"></span>
+                <span key={skill} className="px-5 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 rounded-xl text-sm font-medium hover:border-blue-400 dark:hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-400 hover:shadow-md transition-all duration-300 cursor-default flex items-center gap-2 group">
+                  <span className="w-1.5 h-1.5 rounded-full bg-blue-400 group-hover:bg-blue-600 dark:group-hover:bg-blue-400 transition-colors"></span>
                   {skill}
                 </span>
               ))}
@@ -203,11 +203,11 @@ export default function Home() {
       </section>
 
       {/* Web Applications Section */}
-      <section id="apps" className="py-24 bg-white">
+      <section id="apps" className="py-24 bg-white dark:bg-slate-950">
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-20">
-            <h2 className="text-3xl md:text-5xl font-bold mb-6 text-slate-900 tracking-tight">{t('apps.title')}</h2>
-            <p className="text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed">
+            <h2 className="text-3xl md:text-5xl font-bold mb-6 text-slate-900 dark:text-white tracking-tight">{t('apps.title')}</h2>
+            <p className="text-xl text-slate-600 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed">
               {t('apps.subtitle')}
             </p>
           </div>
