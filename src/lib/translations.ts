@@ -49,6 +49,10 @@ export const translations = {
         title: "AI Blog Content Generator",
         desc: "Automatically generate high-quality blog articles with AI-powered content creation using Google Opal workflow",
       },
+      app5: {
+        title: "AI Video Content Analyzer",
+        desc: "Deep insights and content reconstruction from YouTube videos using advanced AI analysis with Google Opal workflow",
+      },
       splineCard: {
         title: "AI 3D Scene Generator",
         desc: "Generate and customize 3D scenes using advanced AI algorithms and interactive controls",
@@ -160,6 +164,10 @@ export const translations = {
       app4: {
         title: "AI 博客文章生成器",
         desc: "使用 Google Opal 工作流，通过 AI 智能创作自动生成高质量博客文章",
+      },
+      app5: {
+        title: "AI 视频内容分析器",
+        desc: "使用 Google Opal 工作流，通过先进 AI 分析从 YouTube 视频中深度洞察与重构内容",
       },
       splineCard: {
         title: "AI 3D 场景生成器",

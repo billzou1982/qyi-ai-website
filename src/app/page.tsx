@@ -241,6 +241,13 @@ export default function Home() {
                 tags: ["Content Creation", "AI Writing", "Blog Generation"],
                 url: "https://opal.google/?flow=drive:/1d99AfQwquu7yl5MfAPm0nnP7Una_L8H8&shared&mode=app",
                 icon: <FileText className="w-8 h-8 text-white" />
+              },
+              {
+                title: t('apps.app5.title'),
+                desc: t('apps.app5.desc'),
+                tags: ["Video Analysis", "Content Insights", "YouTube"],
+                url: "https://opal.google/?flow=drive:/1s4u8rcSplwzy9Y0Zoi4O5dF-2f2aLEHs&shared&mode=app",
+                icon: <Video className="w-8 h-8 text-white" />
               }
             ].map((app, index) => (
               <div key={index} className="group">
