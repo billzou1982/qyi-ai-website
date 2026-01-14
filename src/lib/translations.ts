@@ -53,6 +53,10 @@ export const translations = {
         title: "AI Video Content Analyzer",
         desc: "Deep insights and content reconstruction from YouTube videos using advanced AI analysis with Google Opal workflow",
       },
+      app6: {
+        title: "Xiaohongshu Visual Content Planner",
+        desc: "AI-powered visual content planning and creation for Xiaohongshu social media platform",
+      },
       splineCard: {
         title: "AI 3D Scene Generator",
         desc: "Generate and customize 3D scenes using advanced AI algorithms and interactive controls",
@@ -168,6 +172,10 @@ export const translations = {
       app5: {
         title: "AI 视频内容分析器",
         desc: "使用 Google Opal 工作流，通过先进 AI 分析从 YouTube 视频中深度洞察与重构内容",
+      },
+      app6: {
+        title: "小红书视觉内容策划",
+        desc: "使用 AI 智能为小红书平台策划和创作视觉内容",
       },
       splineCard: {
         title: "AI 3D 场景生成器",

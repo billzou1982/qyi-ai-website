@@ -50,7 +50,8 @@ import {
   Terminal,
   Video,
   Sparkles,
-  FileText
+  FileText,
+  Image
 } from "lucide-react";
 import { useLanguage } from "@/lib/i18n-context";
 
@@ -248,6 +249,13 @@ export default function Home() {
                 tags: ["Video Analysis", "Content Insights", "YouTube"],
                 url: "https://opal.google/?flow=drive:/1s4u8rcSplwzy9Y0Zoi4O5dF-2f2aLEHs&shared&mode=app",
                 icon: <Video className="w-8 h-8 text-white" />
+              },
+              {
+                title: t('apps.app6.title'),
+                desc: t('apps.app6.desc'),
+                tags: ["Social Media", "Visual Content", "Xiaohongshu"],
+                url: "https://gemini.google.com/gem/19xOzyjFPPxauv9spfFTT3LtHD7wtfoK_?usp=sharing",
+                icon: <Image className="w-8 h-8 text-white" />
               }
             ].map((app, index) => (
               <div key={index} className="group">
