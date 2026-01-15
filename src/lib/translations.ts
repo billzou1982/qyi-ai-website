@@ -53,6 +53,14 @@ export const translations = {
         title: "Hand-Controlled Particle Flow",
         desc: "Interactive 3D particle system controlled by hand gestures through webcam using MediaPipe and Three.js",
       },
+      app6: {
+        title: "AI Video Content Analyzer",
+        desc: "Deep insights and content reconstruction from YouTube videos using advanced AI analysis with Google Opal workflow",
+      },
+      app7: {
+        title: "Xiaohongshu Visual Content Planner",
+        desc: "AI-powered visual content planning and creation for Xiaohongshu social media platform",
+      },
       splineCard: {
         title: "AI 3D Scene Generator",
         desc: "Generate and customize 3D scenes using advanced AI algorithms and interactive controls",
@@ -168,6 +176,14 @@ export const translations = {
       app5: {
         title: "手势控制粒子流",
         desc: "通过摄像头手势控制的交互式 3D 粒子系统，使用 MediaPipe 和 Three.js 技术",
+      },
+      app6: {
+        title: "AI 视频内容分析器",
+        desc: "使用 Google Opal 工作流，通过高级 AI 分析深度洞察 YouTube 视频内容并重构",
+      },
+      app7: {
+        title: "小红书视觉内容规划器",
+        desc: "AI 驱动的小红书社交媒体平台视觉内容规划与创作工具",
       },
       splineCard: {
         title: "AI 3D 场景生成器",

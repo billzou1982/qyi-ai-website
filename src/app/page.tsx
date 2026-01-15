@@ -51,7 +51,8 @@ import {
   Video,
   Sparkles,
   FileText,
-  Hand
+  Hand,
+  Image
 } from "lucide-react";
 import { useLanguage } from "@/lib/i18n-context";
 
@@ -249,6 +250,20 @@ export default function Home() {
                 tags: ["Computer Vision", "3D Graphics", "Interactive"],
                 url: "/hand-particle-flow/index.html",
                 icon: <Hand className="w-8 h-8 text-white" />
+              },
+              {
+                title: t('apps.app6.title'),
+                desc: t('apps.app6.desc'),
+                tags: ["Video Analysis", "AI Content", "YouTube"],
+                url: null,
+                icon: <Video className="w-8 h-8 text-white" />
+              },
+              {
+                title: t('apps.app7.title'),
+                desc: t('apps.app7.desc'),
+                tags: ["Social Media", "Visual Content", "Xiaohongshu"],
+                url: null,
+                icon: <Image className="w-8 h-8 text-white" />
               }
             ].map((app, index) => (
               <div key={index} className="group">
