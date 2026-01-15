@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hand-Controlled 3D Particle Flow</title>
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <!-- Hidden video element for webcam capture -->
+    <video id="webcam" style="display: none;"></video>
+
+    <!-- Canvas container for Three.js rendering -->
+    <div id="canvas-container"></div>
+
+    <!-- Loading indicator -->
+    <div id="loading">
+      <div class="loading-text">Initializing Hand Tracking...</div>
+      <div class="loading-subtext">Please allow camera access</div>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
