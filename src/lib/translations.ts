@@ -49,6 +49,10 @@ export const translations = {
         title: "AI Blog Content Generator",
         desc: "Automatically generate high-quality blog articles with AI-powered content creation using Google Opal workflow",
       },
+      app5: {
+        title: "Hand-Controlled Particle Flow",
+        desc: "Interactive 3D particle system controlled by hand gestures through webcam using MediaPipe and Three.js",
+      },
       splineCard: {
         title: "AI 3D Scene Generator",
         desc: "Generate and customize 3D scenes using advanced AI algorithms and interactive controls",
@@ -160,6 +164,10 @@ export const translations = {
       app4: {
         title: "AI 博客文章生成器",
         desc: "使用 Google Opal 工作流，通过 AI 智能创作自动生成高质量博客文章",
+      },
+      app5: {
+        title: "手势控制粒子流",
+        desc: "通过摄像头手势控制的交互式 3D 粒子系统，使用 MediaPipe 和 Three.js 技术",
       },
       splineCard: {
         title: "AI 3D 场景生成器",
