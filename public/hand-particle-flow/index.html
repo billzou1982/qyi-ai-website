@@ -4,10 +4,21 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Hand-Controlled 3D Particle Flow</title>
-    <script type="module" crossorigin src="./assets/index-BZmT7sEr.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-B4zqrenm.css">
+    <script type="module" crossorigin src="./assets/index-CMIGFXPm.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-C6jVikyk.css">
   </head>
   <body>
+    <!-- Start Experience Overlay -->
+    <div id="start-overlay">
+      <div class="start-content">
+        <h1 class="start-title">Hand-Controlled Particle Flow</h1>
+        <p class="start-subtitle">体验手势控制的 3D 粒子系统</p>
+        <p class="start-description">使用您的摄像头追踪手部动作，食指将成为粒子的控制器</p>
+        <button id="start-btn" class="start-button">开始体验</button>
+        <p class="start-notice">点击后将请求摄像头权限</p>
+      </div>
+    </div>
+
     <!-- Hidden video element for webcam capture -->
     <video id="webcam" style="display: none;"></video>
 
@@ -15,7 +26,7 @@
     <div id="canvas-container"></div>
 
     <!-- Loading indicator -->
-    <div id="loading">
+    <div id="loading" style="display: none;">
       <div class="loading-text">Initializing Hand Tracking...</div>
       <div class="loading-subtext">Please allow camera access</div>
     </div>

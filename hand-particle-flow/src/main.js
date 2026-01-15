@@ -242,37 +242,61 @@ function animate() {
 // ==================== STARTUP ====================
 
 /**
- * Initialize everything and start animation
+ * Initialize Three.js and start particle animation (no camera yet)
  */
-async function init() {
+function initWithoutCamera() {
+  // Initialize Three.js first
+  initThreeJS();
+
+  // Start animation loop immediately (so particles are visible)
+  animate();
+
+  console.log('✅ Three.js initialized, waiting for user interaction');
+}
+
+/**
+ * Initialize MediaPipe after user clicks start button
+ */
+async function startCameraExperience() {
+  const startOverlay = document.getElementById('start-overlay');
+  const loadingEl = document.getElementById('loading');
+
   try {
-    // Initialize Three.js first
-    initThreeJS();
+    // Hide start overlay, show loading
+    startOverlay.classList.add('hidden');
+    loadingEl.style.display = 'flex';
 
-    // Start animation loop immediately (so particles are visible)
-    animate();
-
-    // Initialize MediaPipe (async)
+    // Initialize MediaPipe (async) - THIS requires user gesture
     await initMediaPipe();
 
     // Hide loading screen
-    const loadingEl = document.getElementById('loading');
     loadingEl.classList.add('hidden');
 
     console.log('✅ Application ready');
   } catch (error) {
-    console.error('❌ Initialization error:', error);
+    console.error('❌ Camera initialization error:', error);
 
     // Show error to user
-    const loadingEl = document.getElementById('loading');
     loadingEl.innerHTML = `
-      <div class="loading-text">Error</div>
+      <div class="loading-text">摄像头权限错误</div>
       <div class="loading-subtext">
-        ${error.message || 'Failed to initialize. Please check console.'}
+        ${error.name === 'NotAllowedError'
+          ? '摄像头权限被拒绝。请点击地址栏左侧图标，允许摄像头权限后刷新页面。'
+          : error.message || '初始化失败，请检查浏览器控制台。'}
       </div>
+      <button onclick="location.reload()" style="margin-top: 1rem; padding: 0.5rem 1rem; background: #00d4ff; border: none; border-radius: 8px; color: white; cursor: pointer; font-size: 1rem;">
+        重新尝试
+      </button>
     `;
+
+    // Show the error screen
+    loadingEl.style.display = 'flex';
   }
 }
 
-// Start the application
-init();
+// Initialize Three.js and particles on page load (no camera)
+initWithoutCamera();
+
+// Add click event listener to start button
+const startBtn = document.getElementById('start-btn');
+startBtn.addEventListener('click', startCameraExperience);

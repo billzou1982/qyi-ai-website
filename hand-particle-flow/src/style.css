@@ -71,3 +71,84 @@ html, body {
 .loading-text {
   animation: pulse 2s ease-in-out infinite;
 }
+
+/* Start Experience Overlay */
+#start-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(135deg, #0a0a1e 0%, #1a1a3e 50%, #0f0f2e 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  transition: opacity 0.5s ease-out;
+}
+
+#start-overlay.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.start-content {
+  text-align: center;
+  max-width: 600px;
+  padding: 2rem;
+}
+
+.start-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 1rem;
+  text-shadow: 0 0 30px rgba(0, 212, 255, 0.5);
+}
+
+.start-subtitle {
+  font-size: 1.25rem;
+  color: #00d4ff;
+  margin-bottom: 1rem;
+  font-weight: 500;
+}
+
+.start-description {
+  font-size: 1rem;
+  color: #a0a0b0;
+  margin-bottom: 2.5rem;
+  line-height: 1.6;
+}
+
+.start-button {
+  padding: 1rem 3rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #ffffff;
+  background: linear-gradient(135deg, #00d4ff 0%, #0066ff 100%);
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 20px rgba(0, 212, 255, 0.4);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.start-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 30px rgba(0, 212, 255, 0.6);
+  background: linear-gradient(135deg, #00e4ff 0%, #0076ff 100%);
+}
+
+.start-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 10px rgba(0, 212, 255, 0.4);
+}
+
+.start-notice {
+  margin-top: 1.5rem;
+  font-size: 0.875rem;
+  color: #606070;
+  font-style: italic;
+}
