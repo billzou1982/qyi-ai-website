@@ -217,27 +217,6 @@ export default function Home() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[
               {
-                title: t('apps.app1.title'),
-                desc: t('apps.app1.desc'),
-                tags: ["NLP", "Computer Vision", "Cloud"],
-                url: null,
-                icon: <Bot className="w-8 h-8 text-white" />
-              },
-              {
-                title: t('apps.app2.title'),
-                desc: t('apps.app2.desc'),
-                tags: ["Generative AI", "Deep Learning", "API"],
-                url: null,
-                icon: <Sparkles className="w-8 h-8 text-white" />
-              },
-              {
-                title: t('apps.app3.title'),
-                desc: t('apps.app3.desc'),
-                tags: ["ML", "Data Science", "React"],
-                url: null,
-                icon: <Zap className="w-8 h-8 text-white" />
-              },
-              {
                 title: t('apps.app4.title'),
                 desc: t('apps.app4.desc'),
                 tags: ["Content Creation", "AI Writing", "Blog Generation"],
