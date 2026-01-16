@@ -44,23 +44,29 @@ export class GestureRecognizer {
     if (extendedFingers === 2) {
       const indexTip = landmarks[8];
       const thumbTip = landmarks[4];
-      const distance = this.calculateDistance(indexTip, thumbTip);
-      
+      const middleTip = landmarks[12];
+
+      // Use index and middle finger distance (more reliable than thumb-index)
+      const distance = this.calculateDistance(indexTip, middleTip);
+
       const gesture = {
         type: 'two_fingers',
         data: {
           distance,
           center: this.getHandCenter(landmarks),
           indexTip,
-          thumbTip
+          middleTip,
+          pinchDelta: 0
         }
       };
-      
+
       // Calculate pinch delta for zoom
       if (this.previousFingerDistance !== null) {
         gesture.data.pinchDelta = distance - this.previousFingerDistance;
+      } else {
+        gesture.data.pinchDelta = 0;
       }
-      
+
       this.previousFingerDistance = distance;
       return gesture;
     }

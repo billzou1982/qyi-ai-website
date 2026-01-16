@@ -68,19 +68,28 @@ function createVideoBackground(videoElement) {
   videoTexture = new THREE.VideoTexture(videoElement);
   videoTexture.minFilter = THREE.LinearFilter;
   videoTexture.magFilter = THREE.LinearFilter;
+  videoTexture.format = THREE.RGBAFormat;
 
-  // Create plane geometry that covers the view
-  const planeGeometry = new THREE.PlaneGeometry(40, 30);
+  // Calculate plane size to match camera frustum at z=-10
+  const distance = 10;
+  const vFOV = THREE.MathUtils.degToRad(camera.fov);
+  const height = 2 * Math.tan(vFOV / 2) * distance;
+  const width = height * camera.aspect;
+
+  // Create plane geometry that exactly covers the view
+  const planeGeometry = new THREE.PlaneGeometry(width, height);
   const planeMaterial = new THREE.MeshBasicMaterial({
     map: videoTexture,
-    side: THREE.DoubleSide
+    side: THREE.FrontSide,
+    depthWrite: false
   });
 
   videoPlane = new THREE.Mesh(planeGeometry, planeMaterial);
-  videoPlane.position.z = -10; // Behind particles
+  videoPlane.position.z = -distance; // Behind particles
+  videoPlane.renderOrder = -1; // Render first
   scene.add(videoPlane);
 
-  console.log('✅ Video background created');
+  console.log('✅ Video background created:', width.toFixed(2), 'x', height.toFixed(2));
 }
 
 /**
@@ -167,9 +176,11 @@ function handleGesture(gesture, landmarks) {
       break;
 
     case 'two_fingers':
-      // Pinch to zoom
-      if (gesture.data.pinchDelta) {
-        particleSystem.scaleText(gesture.data.pinchDelta * 10);
+      // Pinch to zoom (using index and middle fingers)
+      if (gesture.data.pinchDelta !== undefined && gesture.data.pinchDelta !== 0) {
+        // Increased sensitivity for better control
+        particleSystem.scaleText(gesture.data.pinchDelta * 50);
+        console.log('✌️ Scaling:', (gesture.data.pinchDelta > 0 ? 'zoom in' : 'zoom out'));
       }
       break;
 
@@ -200,6 +211,12 @@ function handleGesture(gesture, landmarks) {
       break;
   }
 
+  // Reset gesture state when switching gestures
+  if (previousGesture !== gesture.type) {
+    previousHandCenter = null;
+    gestureRecognizer.reset();
+  }
+
   previousGesture = gesture.type;
 }
 
@@ -210,6 +227,17 @@ function onWindowResize() {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
+
+  // Update video background plane size
+  if (videoPlane) {
+    const distance = 10;
+    const vFOV = THREE.MathUtils.degToRad(camera.fov);
+    const height = 2 * Math.tan(vFOV / 2) * distance;
+    const width = height * camera.aspect;
+
+    videoPlane.geometry.dispose();
+    videoPlane.geometry = new THREE.PlaneGeometry(width, height);
+  }
 }
 
 // ==================== ANIMATION LOOP ====================

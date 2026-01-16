@@ -15,9 +15,9 @@ export function generateTextParticles(text, particleCount, worldRange = 10) {
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
   
-  // Set canvas size
+  // Set canvas size with generous padding
   const fontSize = 200;
-  canvas.width = text.length * fontSize * 0.6;
+  canvas.width = text.length * fontSize * 1.2; // Increased for more padding
   canvas.height = fontSize * 1.5;
   
   // Draw text
