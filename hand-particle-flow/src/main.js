@@ -1,6 +1,6 @@
 /**
  * main.js
- * Entry point - integrates Three.js scene with MediaPipe hand tracking
+ * Enhanced particle system with gesture control and video background
  */
 
 import './style.css';
@@ -8,29 +8,25 @@ import * as THREE from 'three';
 import { Hands } from '@mediapipe/hands';
 import { Camera } from '@mediapipe/camera_utils';
 import { ParticleSystem } from './ParticleSystem.js';
-import { mapMediaPipeToThreeJS, lerpVector3 } from './Utils.js';
+import { GestureRecognizer } from './GestureRecognizer.js';
+import { generateTextParticles } from './TextParticles.js';
+import { mapMediaPipeToThreeJS } from './Utils.js';
 
 // ==================== GLOBAL STATE ====================
 let scene, camera, renderer, particleSystem;
-let trailOverlay; // For the ghosting/trail effect
-let handPosition = { x: 0, y: 0, z: 0 };
-let smoothedHandPosition = { x: 0, y: 0, z: 0 };
-let handDetected = false;
-
-// Finger trail (ribbon effect)
-let fingerTrail = [];
-const MAX_TRAIL_LENGTH = 20;
-let trailLine = null;
+let videoTexture, videoPlane;
+let gestureRecognizer;
+let previousGesture = null;
+let previousHandCenter = null;
 
 // ==================== INITIALIZATION ====================
 
 /**
- * Initialize Three.js scene, camera, renderer
+ * Initialize Three.js scene with video background
  */
 function initThreeJS() {
   // Scene
   scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x000000);
 
   // Camera
   const aspect = window.innerWidth / window.innerHeight;
@@ -40,49 +36,51 @@ function initThreeJS() {
   // Renderer
   renderer = new THREE.WebGLRenderer({
     antialias: true,
-    alpha: true,
-    preserveDrawingBuffer: false // We'll handle trails manually
+    alpha: false
   });
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-  // Append canvas to container
   const container = document.getElementById('canvas-container');
   container.appendChild(renderer.domElement);
 
-  // Create trail overlay (semi-transparent plane for ghosting effect)
-  createTrailOverlay();
+  // Generate text particles for "Hello"
+  const textPositions = generateTextParticles('Hello', 5000, 10);
 
-  // Particle System
-  particleSystem = new ParticleSystem(5000, 10);
+  // Particle System with text formation
+  particleSystem = new ParticleSystem(5000, 10, textPositions);
   scene.add(particleSystem.getObject());
 
-  // Add ambient lighting
-  const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-  scene.add(ambientLight);
+  // Gesture recognizer
+  gestureRecognizer = new GestureRecognizer();
 
   // Handle window resize
   window.addEventListener('resize', onWindowResize);
 
-  console.log('✅ Three.js initialized');
+  console.log('✅ Three.js initialized with text particles');
 }
 
 /**
- * Create a semi-transparent overlay plane for trail effect
+ * Create video background plane
  */
-function createTrailOverlay() {
-  const geometry = new THREE.PlaneGeometry(100, 100);
-  const material = new THREE.MeshBasicMaterial({
-    color: 0x000000,
-    transparent: true,
-    opacity: 0.05, // Lower = longer trails
-    depthWrite: false
+function createVideoBackground(videoElement) {
+  // Create video texture
+  videoTexture = new THREE.VideoTexture(videoElement);
+  videoTexture.minFilter = THREE.LinearFilter;
+  videoTexture.magFilter = THREE.LinearFilter;
+
+  // Create plane geometry that covers the view
+  const planeGeometry = new THREE.PlaneGeometry(40, 30);
+  const planeMaterial = new THREE.MeshBasicMaterial({
+    map: videoTexture,
+    side: THREE.DoubleSide
   });
 
-  trailOverlay = new THREE.Mesh(geometry, material);
-  trailOverlay.position.z = 14; // Just in front of camera
-  trailOverlay.renderOrder = 1000; // Render last
-  scene.add(trailOverlay);
+  videoPlane = new THREE.Mesh(planeGeometry, planeMaterial);
+  videoPlane.position.z = -10; // Behind particles
+  scene.add(videoPlane);
+
+  console.log('✅ Video background created');
 }
 
 /**
@@ -118,6 +116,9 @@ async function initMediaPipe() {
 
   await cameraUtil.start();
 
+  // Create video background after camera starts
+  createVideoBackground(videoElement);
+
   console.log('✅ MediaPipe initialized');
 }
 
@@ -125,83 +126,81 @@ async function initMediaPipe() {
  * Handle MediaPipe hand detection results
  */
 function onHandResults(results) {
-  if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
-    const landmarks = results.multiHandLandmarks[0];
-
-    // Get index finger tip (landmark 8)
-    const indexFingerTip = landmarks[8];
-
-    // Map to Three.js coordinates
-    const mapped = mapMediaPipeToThreeJS(
-      indexFingerTip.x,
-      indexFingerTip.y,
-      indexFingerTip.z,
-      10 // worldRange
-    );
-
-    handPosition = mapped;
-    handDetected = true;
-
-    // Update finger trail
-    updateFingerTrail(mapped);
-  } else {
-    handDetected = false;
+  if (!results.multiHandLandmarks || results.multiHandLandmarks.length === 0) {
+    previousGesture = null;
+    previousHandCenter = null;
+    return;
   }
+
+  const landmarks = results.multiHandLandmarks[0];
+  const gesture = gestureRecognizer.recognize(landmarks);
+
+  handleGesture(gesture, landmarks);
 }
 
 /**
- * Update finger trail positions
+ * Handle different gestures
  */
-function updateFingerTrail(position) {
-  fingerTrail.push({ ...position });
+function handleGesture(gesture, landmarks) {
+  const worldRange = 10;
 
-  // Keep only last N positions
-  if (fingerTrail.length > MAX_TRAIL_LENGTH) {
-    fingerTrail.shift();
+  switch (gesture.type) {
+    case 'one_finger':
+      // Move text with index finger
+      const fingerPos = mapMediaPipeToThreeJS(
+        gesture.data.position.x,
+        gesture.data.position.y,
+        gesture.data.position.z,
+        worldRange
+      );
+
+      if (previousHandCenter) {
+        const delta = {
+          x: fingerPos.x - previousHandCenter.x,
+          y: fingerPos.y - previousHandCenter.y,
+          z: fingerPos.z - previousHandCenter.z
+        };
+        particleSystem.moveText(delta);
+      }
+
+      previousHandCenter = fingerPos;
+      break;
+
+    case 'two_fingers':
+      // Pinch to zoom
+      if (gesture.data.pinchDelta) {
+        particleSystem.scaleText(gesture.data.pinchDelta * 10);
+      }
+      break;
+
+    case 'fist':
+      // Scatter particles
+      if (previousGesture !== 'fist') {
+        const center = mapMediaPipeToThreeJS(
+          gesture.data.x,
+          gesture.data.y,
+          gesture.data.z,
+          worldRange
+        );
+        particleSystem.scatter(center);
+        console.log('💥 Scattered!');
+      }
+      break;
+
+    case 'five_fingers':
+      // Reform text
+      if (previousGesture !== 'five_fingers') {
+        particleSystem.reform();
+        console.log('🖐️ Reforming text!');
+      }
+      break;
+
+    default:
+      previousHandCenter = null;
+      break;
   }
 
-  // Update trail line geometry
-  if (fingerTrail.length >= 2) {
-    updateTrailLine();
-  }
-}
-
-/**
- * Create/update the finger trail line
- */
-function updateTrailLine() {
-  // Remove old trail
-  if (trailLine) {
-    scene.remove(trailLine);
-    trailLine.geometry.dispose();
-    trailLine.material.dispose();
-  }
-
-  // Create new trail geometry
-  const points = fingerTrail.map(pos => new THREE.Vector3(pos.x, pos.y, pos.z));
-  const geometry = new THREE.BufferGeometry().setFromPoints(points);
-
-  // Create gradient colors (fade from bright to dim)
-  const colors = new Float32Array(fingerTrail.length * 3);
-  for (let i = 0; i < fingerTrail.length; i++) {
-    const alpha = i / fingerTrail.length; // 0 to 1
-    colors[i * 3] = 0.0 + alpha * 1.0;     // R: 0 -> 1
-    colors[i * 3 + 1] = 0.8 + alpha * 0.2; // G: 0.8 -> 1
-    colors[i * 3 + 2] = 1.0;                // B: 1
-  }
-  geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-
-  // Create line material
-  const material = new THREE.LineBasicMaterial({
-    vertexColors: true,
-    linewidth: 2,
-    transparent: true,
-    opacity: 0.8,
-    blending: THREE.AdditiveBlending
-  });
-
-  trailLine = new THREE.Line(geometry, material);
-  scene.add(trailLine);
+  previousGesture = gesture.type;
 }
 
 /**
@@ -221,18 +220,7 @@ function onWindowResize() {
 function animate() {
   requestAnimationFrame(animate);
 
-  // Smooth hand position with lerp to reduce jitter
-  if (handDetected) {
-    smoothedHandPosition = lerpVector3(smoothedHandPosition, handPosition, 0.2);
-  }
-
-  // Update particle system with hand position
-  const handVector = new THREE.Vector3(
-    smoothedHandPosition.x,
-    smoothedHandPosition.y,
-    smoothedHandPosition.z
-  );
-  particleSystem.updateHandPosition(handVector, handDetected);
+  // Update particle system
   particleSystem.update();
 
   // Render scene
@@ -242,61 +230,50 @@ function animate() {
 // ==================== STARTUP ====================
 
 /**
- * Initialize Three.js and start particle animation (no camera yet)
+ * Initialize Three.js (no camera yet)
  */
 function initWithoutCamera() {
-  // Initialize Three.js first
   initThreeJS();
-
-  // Start animation loop immediately (so particles are visible)
   animate();
-
   console.log('✅ Three.js initialized, waiting for user interaction');
 }
 
 /**
- * Initialize MediaPipe after user clicks start button
+ * Start camera experience after user clicks
  */
 async function startCameraExperience() {
   const startOverlay = document.getElementById('start-overlay');
   const loadingEl = document.getElementById('loading');
 
   try {
-    // Hide start overlay, show loading
     startOverlay.classList.add('hidden');
     loadingEl.style.display = 'flex';
 
-    // Initialize MediaPipe (async) - THIS requires user gesture
     await initMediaPipe();
 
-    // Hide loading screen
     loadingEl.classList.add('hidden');
-
     console.log('✅ Application ready');
   } catch (error) {
     console.error('❌ Camera initialization error:', error);
 
-    // Show error to user
+    const errorMsg = error.name === 'NotAllowedError'
+      ? '摄像头权限被拒绝。请点击地址栏左侧图标，允许摄像头权限后刷新页面。'
+      : (error.message || '初始化失败，请检查浏览器控制台。');
+
     loadingEl.innerHTML = `
       <div class="loading-text">摄像头权限错误</div>
-      <div class="loading-subtext">
-        ${error.name === 'NotAllowedError'
-          ? '摄像头权限被拒绝。请点击地址栏左侧图标，允许摄像头权限后刷新页面。'
-          : error.message || '初始化失败，请检查浏览器控制台。'}
-      </div>
+      <div class="loading-subtext">${errorMsg}</div>
       <button onclick="location.reload()" style="margin-top: 1rem; padding: 0.5rem 1rem; background: #00d4ff; border: none; border-radius: 8px; color: white; cursor: pointer; font-size: 1rem;">
         重新尝试
       </button>
     `;
 
-    // Show the error screen
     loadingEl.style.display = 'flex';
   }
 }
 
-// Initialize Three.js and particles on page load (no camera)
+// Initialize and start
 initWithoutCamera();
 
-// Add click event listener to start button
 const startBtn = document.getElementById('start-btn');
 startBtn.addEventListener('click', startCameraExperience);

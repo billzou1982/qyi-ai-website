@@ -1,64 +1,57 @@
 /**
- * ParticleSystem.js
- * Advanced particle system with physics-based interactions
+ * ParticleSystem.js  
+ * Enhanced particle system with text formation and gesture interactions
  */
 
 import * as THREE from 'three';
 
 export class ParticleSystem {
-  constructor(particleCount = 5000, worldRange = 10) {
+  constructor(particleCount = 5000, worldRange = 10, textPositions = null) {
     this.particleCount = particleCount;
     this.worldRange = worldRange;
 
+    // Particle states
+    this.STATE_FORMED = 'formed';      // Text is formed and static
+    this.STATE_SCATTERED = 'scattered'; // Particles are scattered
+    this.currentState = this.STATE_FORMED;
+
+    // Transform properties
+    this.textOffset = new THREE.Vector3(0, 0, 0);  // Text position offset
+    this.textScale = 1.0;                          // Text scale
+    this.targetScale = 1.0;
+
     // Physics parameters
     this.params = {
-      homeForce: 0.02,          // Strength of return-to-home force
-      repulsionForce: 0.5,       // Strength of hand repulsion
-      repulsionRadius: 3,        // Radius of hand influence
-      friction: 0.95,            // Velocity damping (0-1)
-      maxVelocity: 0.5,          // Maximum particle velocity
-      colorSpeed: 0.01           // Speed of color change based on velocity
+      homeForce: 0.05,          // Strength of return to text position
+      scatterForce: 2.0,        // Force when scattering
+      friction: 0.92,           // Velocity damping
+      maxVelocity: 1.5,         // Maximum particle velocity
     };
 
-    // Hand position (updated from external source)
-    this.handPosition = new THREE.Vector3(0, 0, 0);
-    this.handActive = false;
-
     // Initialize particle data
-    this.initParticles();
+    this.initParticles(textPositions);
     this.createThreeJSObjects();
   }
 
   /**
-   * Initialize particle positions, velocities, and home positions
+   * Initialize particle positions
    */
-  initParticles() {
+  initParticles(textPositions) {
     const count = this.particleCount;
 
-    // Position arrays
     this.positions = new Float32Array(count * 3);
-    this.homePositions = new Float32Array(count * 3);
+    this.textPositions = textPositions || new Float32Array(count * 3); // Original text formation
     this.velocities = new Float32Array(count * 3);
     this.colors = new Float32Array(count * 3);
 
-    // Initialize each particle
+    // Initialize particles at text positions
     for (let i = 0; i < count; i++) {
       const i3 = i * 3;
 
-      // Random position within cube
-      const x = (Math.random() - 0.5) * this.worldRange * 2;
-      const y = (Math.random() - 0.5) * this.worldRange * 2;
-      const z = (Math.random() - 0.5) * this.worldRange * 1.5;
-
-      // Set positions
-      this.positions[i3] = x;
-      this.positions[i3 + 1] = y;
-      this.positions[i3 + 2] = z;
-
-      // Store home position
-      this.homePositions[i3] = x;
-      this.homePositions[i3 + 1] = y;
-      this.homePositions[i3 + 2] = z;
+      // Current position = text position
+      this.positions[i3] = this.textPositions[i3];
+      this.positions[i3 + 1] = this.textPositions[i3 + 1];
+      this.positions[i3 + 2] = this.textPositions[i3 + 2];
 
       // Initialize velocity to zero
       this.velocities[i3] = 0;
@@ -66,7 +59,7 @@ export class ParticleSystem {
       this.velocities[i3 + 2] = 0;
 
       // Initialize color (cyan/teal)
-      this.colors[i3] = 0.0;      // R
+      this.colors[i3] = 0.2;      // R
       this.colors[i3 + 1] = 0.8;  // G
       this.colors[i3 + 2] = 1.0;  // B
     }
@@ -76,10 +69,8 @@ export class ParticleSystem {
    * Create Three.js geometry and material
    */
   createThreeJSObjects() {
-    // Create buffer geometry
     this.geometry = new THREE.BufferGeometry();
 
-    // Set attributes
     this.geometry.setAttribute(
       'position',
       new THREE.BufferAttribute(this.positions, 3)
@@ -90,93 +81,121 @@ export class ParticleSystem {
       new THREE.BufferAttribute(this.colors, 3)
     );
 
-    // Create material with additive blending for glow effect
     this.material = new THREE.PointsMaterial({
       size: 0.15,
       vertexColors: true,
       blending: THREE.AdditiveBlending,
       transparent: true,
-      opacity: 0.8,
+      opacity: 0.9,
       depthWrite: false,
       sizeAttenuation: true
     });
 
-    // Create points object
     this.points = new THREE.Points(this.geometry, this.material);
   }
 
   /**
-   * Update hand position from external source (MediaPipe)
-   * @param {THREE.Vector3} position - Hand position in world coordinates
-   * @param {boolean} active - Whether hand is detected
+   * Move text (one finger gesture)
    */
-  updateHandPosition(position, active = true) {
-    this.handPosition.copy(position);
-    this.handActive = active;
+  moveText(delta) {
+    this.textOffset.x += delta.x;
+    this.textOffset.y += delta.y;
   }
 
   /**
-   * Main physics update loop - called every frame
+   * Scale text (pinch gesture)
+   */
+  scaleText(scaleDelta) {
+    this.targetScale += scaleDelta * 0.05;
+    this.targetScale = Math.max(0.3, Math.min(this.targetScale, 3.0)); // Clamp
+  }
+
+  /**
+   * Scatter particles (fist gesture)
+   */
+  scatter(center) {
+    this.currentState = this.STATE_SCATTERED;
+    
+    const count = this.particleCount;
+    for (let i = 0; i < count; i++) {
+      const i3 = i * 3;
+      
+      // Random direction from center
+      const angle = Math.random() * Math.PI * 2;
+      const elevation = (Math.random() - 0.5) * Math.PI;
+      const force = this.params.scatterForce * (0.5 + Math.random() * 0.5);
+      
+      this.velocities[i3] += Math.cos(angle) * Math.cos(elevation) * force;
+      this.velocities[i3 + 1] += Math.sin(elevation) * force;
+      this.velocities[i3 + 2] += Math.sin(angle) * Math.cos(elevation) * force;
+    }
+  }
+
+  /**
+   * Reform text (five fingers gesture)
+   */
+  reform() {
+    this.currentState = this.STATE_FORMED;
+    // Particles will gradually return to text positions
+  }
+
+  /**
+   * Main update loop
    */
   update() {
     const count = this.particleCount;
     const posAttr = this.geometry.attributes.position;
     const colorAttr = this.geometry.attributes.color;
 
-    // Temporary vectors for calculations (reused for performance)
-    const particlePos = new THREE.Vector3();
-    const toHome = new THREE.Vector3();
-    const toHand = new THREE.Vector3();
+    // Smoothly interpolate scale
+    this.textScale += (this.targetScale - this.textScale) * 0.1;
 
     for (let i = 0; i < count; i++) {
       const i3 = i * 3;
 
-      // Current position
-      particlePos.set(
-        this.positions[i3],
-        this.positions[i3 + 1],
-        this.positions[i3 + 2]
-      );
+      if (this.currentState === this.STATE_FORMED) {
+        // Calculate target position (text position + offset + scale)
+        const targetX = this.textPositions[i3] * this.textScale + this.textOffset.x;
+        const targetY = this.textPositions[i3 + 1] * this.textScale + this.textOffset.y;
+        const targetZ = this.textPositions[i3 + 2] * this.textScale + this.textOffset.z;
 
-      // --- FORCE 1: Home Force (Spring back to original position) ---
-      toHome.set(
-        this.homePositions[i3] - this.positions[i3],
-        this.homePositions[i3 + 1] - this.positions[i3 + 1],
-        this.homePositions[i3 + 2] - this.positions[i3 + 2]
-      );
+        // Apply force toward target position
+        const dx = targetX - this.positions[i3];
+        const dy = targetY - this.positions[i3 + 1];
+        const dz = targetZ - this.positions[i3 + 2];
 
-      // Apply home force to velocity
-      this.velocities[i3] += toHome.x * this.params.homeForce;
-      this.velocities[i3 + 1] += toHome.y * this.params.homeForce;
-      this.velocities[i3 + 2] += toHome.z * this.params.homeForce;
+        this.velocities[i3] += dx * this.params.homeForce;
+        this.velocities[i3 + 1] += dy * this.params.homeForce;
+        this.velocities[i3 + 2] += dz * this.params.homeForce;
 
-      // --- FORCE 2: Hand Repulsion Force ---
-      if (this.handActive) {
-        toHand.copy(this.handPosition).sub(particlePos);
-        const distance = toHand.length();
+        // Color: more cyan when formed
+        this.colors[i3] = 0.2;
+        this.colors[i3 + 1] = 0.8;
+        this.colors[i3 + 2] = 1.0;
 
-        // Only apply force if within repulsion radius
-        if (distance < this.params.repulsionRadius) {
-          // Normalize and scale by inverse square law (closer = stronger)
-          const forceMagnitude =
-            this.params.repulsionForce *
-            (1 - distance / this.params.repulsionRadius) ** 2;
+      } else if (this.currentState === this.STATE_SCATTERED) {
+        // In scattered mode, particles fly freely with gravity-like effect
+        this.velocities[i3 + 1] -= 0.01; // Slight downward force
 
-          // Apply repulsion (opposite direction to hand)
-          toHand.normalize().multiplyScalar(-forceMagnitude);
-
-          this.velocities[i3] += toHand.x;
-          this.velocities[i3 + 1] += toHand.y;
-          this.velocities[i3 + 2] += toHand.z;
-        }
+        // Color: more white/yellow when scattered
+        const velMag = Math.sqrt(
+          this.velocities[i3] ** 2 +
+          this.velocities[i3 + 1] ** 2 +
+          this.velocities[i3 + 2] ** 2
+        );
+        const intensity = Math.min(velMag / this.params.maxVelocity, 1.0);
+        
+        this.colors[i3] = 0.5 + intensity * 0.5;
+        this.colors[i3 + 1] = 0.7 + intensity * 0.3;
+        this.colors[i3 + 2] = 0.8 + intensity * 0.2;
       }
 
-      // --- Apply Friction (Damping) ---
+      // Apply friction
       this.velocities[i3] *= this.params.friction;
       this.velocities[i3 + 1] *= this.params.friction;
       this.velocities[i3 + 2] *= this.params.friction;
 
-      // --- Clamp Velocity ---
+      // Clamp velocity
       const velMagnitude = Math.sqrt(
         this.velocities[i3] ** 2 +
         this.velocities[i3 + 1] ** 2 +
@@ -190,36 +209,20 @@ export class ParticleSystem {
         this.velocities[i3 + 2] *= scale;
       }
 
-      // --- Update Position ---
+      // Update position
       this.positions[i3] += this.velocities[i3];
       this.positions[i3 + 1] += this.velocities[i3 + 1];
       this.positions[i3 + 2] += this.velocities[i3 + 2];
-
-      // --- Update Color Based on Velocity ---
-      const normalizedVel = velMagnitude / this.params.maxVelocity;
-
-      // Interpolate between cyan (slow) and white (fast)
-      this.colors[i3] = normalizedVel * 0.8;           // R: 0 -> 0.8
-      this.colors[i3 + 1] = 0.8 + normalizedVel * 0.2; // G: 0.8 -> 1.0
-      this.colors[i3 + 2] = 1.0;                        // B: 1.0 (constant)
     }
 
-    // Mark attributes as needing update
     posAttr.needsUpdate = true;
     colorAttr.needsUpdate = true;
   }
 
-  /**
-   * Get the Three.js points object for adding to scene
-   * @returns {THREE.Points} The points object
-   */
   getObject() {
     return this.points;
   }
 
-  /**
-   * Clean up resources
-   */
   dispose() {
     this.geometry.dispose();
     this.material.dispose();
