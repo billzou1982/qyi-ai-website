@@ -70,10 +70,16 @@ function createVideoBackground(videoElement) {
   videoTexture.magFilter = THREE.LinearFilter;
   videoTexture.format = THREE.RGBAFormat;
 
-  // Calculate plane size to match camera frustum at z=-10
-  const distance = 10;
+  // Video plane position
+  const planeZ = -10;
+
+  // Calculate actual distance from camera to plane
+  // Camera is at z=15, plane at z=-10, so distance = 15 - (-10) = 25
+  const distanceFromCamera = camera.position.z - planeZ;
+
+  // Calculate plane size to match camera frustum at the plane's position
   const vFOV = THREE.MathUtils.degToRad(camera.fov);
-  const height = 2 * Math.tan(vFOV / 2) * distance;
+  const height = 2 * Math.tan(vFOV / 2) * distanceFromCamera;
   const width = height * camera.aspect;
 
   // Create plane geometry that exactly covers the view
@@ -85,11 +91,12 @@ function createVideoBackground(videoElement) {
   });
 
   videoPlane = new THREE.Mesh(planeGeometry, planeMaterial);
-  videoPlane.position.z = -distance; // Behind particles
+  videoPlane.position.z = planeZ; // Behind particles
   videoPlane.renderOrder = -1; // Render first
   scene.add(videoPlane);
 
-  console.log('✅ Video background created:', width.toFixed(2), 'x', height.toFixed(2));
+  console.log('✅ Video background created:', width.toFixed(2), 'x', height.toFixed(2),
+              'distance:', distanceFromCamera);
 }
 
 /**
@@ -230,9 +237,10 @@ function onWindowResize() {
 
   // Update video background plane size
   if (videoPlane) {
-    const distance = 10;
+    // Calculate actual distance from camera to plane
+    const distanceFromCamera = camera.position.z - videoPlane.position.z;
     const vFOV = THREE.MathUtils.degToRad(camera.fov);
-    const height = 2 * Math.tan(vFOV / 2) * distance;
+    const height = 2 * Math.tan(vFOV / 2) * distanceFromCamera;
     const width = height * camera.aspect;
 
     videoPlane.geometry.dispose();
