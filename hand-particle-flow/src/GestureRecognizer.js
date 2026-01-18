@@ -48,7 +48,10 @@ export class GestureRecognizer {
     if (extendedFingers <= 1) {
       return {
         type: 'fist',
-        data: handCenter
+        data: {
+          center: handCenter,
+          isStable: isGestureStable
+        }
       };
     }
 
@@ -56,7 +59,10 @@ export class GestureRecognizer {
     if (extendedFingers >= 5) {
       return {
         type: 'open_palm',
-        data: handCenter
+        data: {
+          center: handCenter,
+          isStable: isGestureStable
+        }
       };
     }
 
