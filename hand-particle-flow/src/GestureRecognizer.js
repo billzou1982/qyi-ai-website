@@ -32,6 +32,7 @@ export class GestureRecognizer {
     if (currentGestureType !== this.previousGesture) {
       console.log('👆 Fingers:', extendedFingers, '→ Gesture:', currentGestureType);
     }
+    this.previousGesture = currentGestureType;
 
     // Fist (0-1 extended fingers) - scatter
     if (extendedFingers <= 1) {

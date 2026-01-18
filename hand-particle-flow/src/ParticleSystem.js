@@ -22,10 +22,10 @@ export class ParticleSystem {
 
     // Physics parameters
     this.params = {
-      homeForce: 0.05,          // Strength of return to sphere position
+      homeForce: 0.25,          // Strength of return to sphere position (increased 5x for faster recovery)
       scatterForce: 2.0,        // Force when scattering
       friction: 0.92,           // Velocity damping
-      maxVelocity: 1.5,         // Maximum particle velocity
+      maxVelocity: 2.5,         // Maximum particle velocity (increased for faster movement)
     };
 
     // Initialize particle data
@@ -187,8 +187,8 @@ export class ParticleSystem {
         this.colors[i3 + 2] = this.initialColors[i3 + 2];
 
       } else if (this.currentState === this.STATE_SCATTERED) {
-        // In scattered mode, particles fly freely with gravity-like effect
-        this.velocities[i3 + 1] -= 0.01; // Slight downward force
+        // In scattered mode, particles fly freely
+        // Removed downward force to prevent particles falling out of view
 
         // Brighten colors slightly when scattered, but keep Earth tones
         const velMag = Math.sqrt(
