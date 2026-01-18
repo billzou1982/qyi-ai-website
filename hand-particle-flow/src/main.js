@@ -9,7 +9,7 @@ import { Hands } from '@mediapipe/hands';
 import { Camera } from '@mediapipe/camera_utils';
 import { ParticleSystem } from './ParticleSystem.js';
 import { GestureRecognizer } from './GestureRecognizer.js';
-import { generateTextParticles } from './TextParticles.js';
+import { generateEarthSphere } from './TextParticles.js';
 import { mapMediaPipeToThreeJS } from './Utils.js';
 
 // ==================== GLOBAL STATE ====================
@@ -44,11 +44,26 @@ function initThreeJS() {
   const container = document.getElementById('canvas-container');
   container.appendChild(renderer.domElement);
 
-  // Generate text particles for "Hello"
-  const textPositions = generateTextParticles('Hello', 5000, 10);
+  // Calculate sphere radius to occupy 1/5 of screen height
+  // At camera.position.z = 15 with FOV = 75°:
+  // viewport height = 2 * tan(FOV/2) * distance ≈ 22.2
+  // sphere diameter should be 22.2 / 5 ≈ 4.44
+  // sphere radius ≈ 2.2
+  const vFOV = THREE.MathUtils.degToRad(camera.fov);
+  const viewportHeight = 2 * Math.tan(vFOV / 2) * camera.position.z;
+  const sphereRadius = (viewportHeight / 5) / 2; // Diameter/5, then /2 for radius
 
-  // Particle System with text formation
-  particleSystem = new ParticleSystem(5000, 10, textPositions);
+  // Generate Earth sphere particles with realistic colors
+  const particleCount = 6000; // Increased for better sphere coverage
+  const earthData = generateEarthSphere(sphereRadius, particleCount);
+
+  // Particle System with Earth sphere
+  particleSystem = new ParticleSystem(
+    particleCount,
+    10,
+    earthData.positions,
+    earthData.colors
+  );
   scene.add(particleSystem.getObject());
 
   // Gesture recognizer
@@ -57,7 +72,7 @@ function initThreeJS() {
   // Handle window resize
   window.addEventListener('resize', onWindowResize);
 
-  console.log('✅ Three.js initialized with text particles');
+  console.log('✅ Three.js initialized with Earth sphere (radius:', sphereRadius.toFixed(2), ')');
 }
 
 /**
@@ -156,41 +171,15 @@ function onHandResults(results) {
 
 /**
  * Handle different gestures
+ * 3 core gestures:
+ * - Fist: scatter particles
+ * - Open palm: reform sphere
+ * - Move hand (2-4 fingers): move sphere
  */
 function handleGesture(gesture, landmarks) {
   const worldRange = 10;
 
   switch (gesture.type) {
-    case 'one_finger':
-      // Move text with index finger
-      const fingerPos = mapMediaPipeToThreeJS(
-        gesture.data.position.x,
-        gesture.data.position.y,
-        gesture.data.position.z,
-        worldRange
-      );
-
-      if (previousHandCenter) {
-        const delta = {
-          x: fingerPos.x - previousHandCenter.x,
-          y: fingerPos.y - previousHandCenter.y,
-          z: fingerPos.z - previousHandCenter.z
-        };
-        particleSystem.moveText(delta);
-      }
-
-      previousHandCenter = fingerPos;
-      break;
-
-    case 'two_fingers':
-      // Pinch to zoom (using index and middle fingers)
-      if (gesture.data.pinchDelta !== undefined && gesture.data.pinchDelta !== 0) {
-        // Increased sensitivity for better control
-        particleSystem.scaleText(gesture.data.pinchDelta * 50);
-        console.log('✌️ Scaling:', (gesture.data.pinchDelta > 0 ? 'zoom in' : 'zoom out'));
-      }
-      break;
-
     case 'fist':
       // Scatter particles
       if (previousGesture !== 'fist') {
@@ -201,15 +190,34 @@ function handleGesture(gesture, landmarks) {
           worldRange
         );
         particleSystem.scatter(center);
-        console.log('💥 Scattered!');
+        console.log('✊ Fist: Scattered particles!');
       }
       break;
 
-    case 'five_fingers':
-      // Reform text
-      if (previousGesture !== 'five_fingers') {
+    case 'open_palm':
+      // Reform sphere
+      if (previousGesture !== 'open_palm') {
         particleSystem.reform();
-        console.log('🖐️ Reforming text!');
+        console.log('🖐️ Open palm: Reforming Earth sphere!');
+      }
+      break;
+
+    case 'move_hand':
+      // Move sphere with hand movement (2-4 fingers)
+      if (gesture.data && gesture.data.delta) {
+        const delta = mapMediaPipeToThreeJS(
+          gesture.data.delta.x,
+          gesture.data.delta.y,
+          gesture.data.delta.z,
+          worldRange
+        );
+
+        // Only move if delta is significant (avoid jitter)
+        const magnitude = Math.sqrt(delta.x ** 2 + delta.y ** 2);
+        if (magnitude > 0.1) {
+          particleSystem.moveSphere(delta);
+          console.log('👋 Moving sphere:', gesture.data.fingerCount, 'fingers');
+        }
       }
       break;
 

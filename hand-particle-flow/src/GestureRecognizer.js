@@ -1,16 +1,21 @@
 /**
  * GestureRecognizer.js
- * Recognizes different hand gestures from MediaPipe landmarks
+ * Recognizes 3 core hand gestures from MediaPipe landmarks
  */
 
 export class GestureRecognizer {
   constructor() {
     this.previousGesture = null;
-    this.previousFingerDistance = null;
+    this.previousHandCenter = null;
   }
 
   /**
    * Recognize gesture from hand landmarks
+   * Simplified to 3 gestures:
+   * - Fist (0-1 fingers): scatter particles
+   * - Open palm (5 fingers): reform sphere
+   * - Multiple fingers (2-4): move sphere
+   *
    * @param {Array} landmarks - MediaPipe hand landmarks
    * @returns {Object} Gesture information
    */
@@ -20,65 +25,47 @@ export class GestureRecognizer {
     }
 
     const extendedFingers = this.countExtendedFingers(landmarks);
-    
-    // Fist (no extended fingers)
-    if (extendedFingers === 0) {
+    const handCenter = this.getHandCenter(landmarks);
+
+    // Fist (0-1 extended fingers) - scatter
+    if (extendedFingers <= 1) {
       return {
         type: 'fist',
-        data: this.getHandCenter(landmarks)
+        data: handCenter
       };
     }
-    
-    // One finger (index only)
-    if (extendedFingers === 1 && this.isFingerExtended(landmarks, 8)) {
-      return {
-        type: 'one_finger',
-        data: {
-          position: landmarks[8], // Index finger tip
-          center: this.getHandCenter(landmarks)
-        }
-      };
-    }
-    
-    // Two fingers (for pinch/zoom)
-    if (extendedFingers === 2) {
-      const indexTip = landmarks[8];
-      const thumbTip = landmarks[4];
-      const middleTip = landmarks[12];
 
-      // Use index and middle finger distance (more reliable than thumb-index)
-      const distance = this.calculateDistance(indexTip, middleTip);
-
-      const gesture = {
-        type: 'two_fingers',
-        data: {
-          distance,
-          center: this.getHandCenter(landmarks),
-          indexTip,
-          middleTip,
-          pinchDelta: 0
-        }
-      };
-
-      // Calculate pinch delta for zoom
-      if (this.previousFingerDistance !== null) {
-        gesture.data.pinchDelta = distance - this.previousFingerDistance;
-      } else {
-        gesture.data.pinchDelta = 0;
-      }
-
-      this.previousFingerDistance = distance;
-      return gesture;
-    }
-    
-    // Five fingers (open palm)
+    // Open palm (5 fingers) - reform
     if (extendedFingers >= 5) {
       return {
-        type: 'five_fingers',
-        data: this.getHandCenter(landmarks)
+        type: 'open_palm',
+        data: handCenter
       };
     }
-    
+
+    // Multiple fingers (2-4) - move sphere
+    if (extendedFingers >= 2 && extendedFingers <= 4) {
+      const moveDelta = { x: 0, y: 0, z: 0 };
+
+      // Calculate movement delta if we have previous position
+      if (this.previousHandCenter) {
+        moveDelta.x = handCenter.x - this.previousHandCenter.x;
+        moveDelta.y = handCenter.y - this.previousHandCenter.y;
+        moveDelta.z = handCenter.z - this.previousHandCenter.z;
+      }
+
+      this.previousHandCenter = handCenter;
+
+      return {
+        type: 'move_hand',
+        data: {
+          center: handCenter,
+          delta: moveDelta,
+          fingerCount: extendedFingers
+        }
+      };
+    }
+
     // Default
     return { type: 'unknown', data: null };
   }
@@ -153,6 +140,6 @@ export class GestureRecognizer {
    */
   reset() {
     this.previousGesture = null;
-    this.previousFingerDistance = null;
+    this.previousHandCenter = null;
   }
 }
