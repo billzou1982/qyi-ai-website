@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hand-Controlled 3D Particle Flow</title>
+    <script type="module" crossorigin src="./assets/index-DSZ9w_JT.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-C6jVikyk.css">
+  </head>
+  <body>
+    <!-- Start Experience Overlay -->
+    <div id="start-overlay">
+      <div class="start-content">
+        <h1 class="start-title">Hand-Controlled Earth</h1>
+        <p class="start-subtitle">体验手势控制的3D地球粒子</p>
+        <div class="start-description">
+          <p style="margin-bottom: 1rem;">使用您的摄像头追踪手部动作，通过手势控制地球粒子：</p>
+          <ul style="text-align: left; max-width: 400px; margin: 0 auto; line-height: 1.8;">
+            <li>👋 <strong>多根手指</strong>（2-4根）：移动地球位置</li>
+            <li>✊ <strong>握拳</strong>：打散粒子</li>
+            <li>🖐️ <strong>张开手掌</strong>（5根手指）：重新聚合地球</li>
+          </ul>
+          <p style="margin-top: 1rem; font-size: 0.9rem; opacity: 0.8;">
+            地球粒子展示海洋、陆地和极地冰盖
+          </p>
+        </div>
+        <button id="start-btn" class="start-button">开始体验</button>
+        <p class="start-notice">点击后将请求摄像头权限</p>
+      </div>
+    </div>
+
+    <!-- Hidden video element for webcam capture -->
+    <video id="webcam" style="display: none;"></video>
+
+    <!-- Canvas container for Three.js rendering -->
+    <div id="canvas-container"></div>
+
+    <!-- Loading indicator -->
+    <div id="loading" style="display: none;">
+      <div class="loading-text">Initializing Hand Tracking...</div>
+      <div class="loading-subtext">Please allow camera access</div>
+    </div>
+
+  </body>
+</html>
