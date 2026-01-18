@@ -7,6 +7,8 @@ export class GestureRecognizer {
   constructor() {
     this.previousGesture = null;
     this.previousHandCenter = null;
+    this.gestureStartTime = null;
+    this.gestureStableThreshold = 300; // Gesture must be stable for 300ms before triggering move
   }
 
   /**
@@ -29,10 +31,18 @@ export class GestureRecognizer {
 
     // Only log when gesture changes
     const currentGestureType = this._determineGestureType(extendedFingers);
+    const now = Date.now();
+
+    // Track gesture stability
     if (currentGestureType !== this.previousGesture) {
       console.log('👆 Fingers:', extendedFingers, '→ Gesture:', currentGestureType);
+      this.gestureStartTime = now;
     }
     this.previousGesture = currentGestureType;
+
+    // Check if gesture has been stable long enough
+    const gestureStableDuration = this.gestureStartTime ? now - this.gestureStartTime : 0;
+    const isGestureStable = gestureStableDuration >= this.gestureStableThreshold;
 
     // Fist (0-1 extended fingers) - scatter
     if (extendedFingers <= 1) {
@@ -54,13 +64,14 @@ export class GestureRecognizer {
     if (extendedFingers >= 2 && extendedFingers <= 4) {
       const moveDelta = { x: 0, y: 0, z: 0 };
 
-      // Calculate movement delta if we have previous position
-      if (this.previousHandCenter) {
+      // Only allow movement if gesture has been stable for threshold duration
+      if (isGestureStable && this.previousHandCenter) {
         moveDelta.x = handCenter.x - this.previousHandCenter.x;
         moveDelta.y = handCenter.y - this.previousHandCenter.y;
         moveDelta.z = handCenter.z - this.previousHandCenter.z;
       }
 
+      // Always update previous hand center for next frame
       this.previousHandCenter = handCenter;
 
       return {
@@ -68,7 +79,8 @@ export class GestureRecognizer {
         data: {
           center: handCenter,
           delta: moveDelta,
-          fingerCount: extendedFingers
+          fingerCount: extendedFingers,
+          isStable: isGestureStable
         }
       };
     }
@@ -155,5 +167,6 @@ export class GestureRecognizer {
   reset() {
     this.previousGesture = null;
     this.previousHandCenter = null;
+    this.gestureStartTime = null;
   }
 }
