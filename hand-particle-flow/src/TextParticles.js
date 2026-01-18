@@ -105,6 +105,65 @@ export function generateEarthSphere(radius, particleCount) {
 }
 
 /**
+ * Generate Earth colors from a texture map with simple lighting.
+ * @param {Float32Array} positions - Particle positions (x, y, z).
+ * @param {number} radius - Sphere radius.
+ * @param {Object} textureData - { data: Uint8ClampedArray, width: number, height: number }
+ * @param {Object} options - Optional lighting settings.
+ * @returns {Float32Array} Colors array.
+ */
+export function generateEarthColorsFromTexture(positions, radius, textureData, options = {}) {
+  const { data, width, height } = textureData;
+  const colors = new Float32Array(positions.length);
+
+  const lightDirection = options.lightDirection || { x: -0.3, y: 0.2, z: 1.0 };
+  const lightLen = Math.hypot(lightDirection.x, lightDirection.y, lightDirection.z) || 1;
+  const lightDir = {
+    x: lightDirection.x / lightLen,
+    y: lightDirection.y / lightLen,
+    z: lightDirection.z / lightLen
+  };
+  const ambient = options.ambient ?? 0.25;
+  const diffuse = options.diffuse ?? 0.85;
+
+  for (let i = 0; i < positions.length; i += 3) {
+    const x = positions[i];
+    const y = positions[i + 1];
+    const z = positions[i + 2];
+
+    const lat = Math.asin(y / radius);
+    const lon = Math.atan2(z, x);
+
+    const u = (lon + Math.PI) / (2 * Math.PI);
+    const v = 1 - (lat + Math.PI / 2) / Math.PI;
+
+    const px = Math.min(width - 1, Math.max(0, Math.floor(u * (width - 1))));
+    const py = Math.min(height - 1, Math.max(0, Math.floor(v * (height - 1))));
+    const idx = (py * width + px) * 4;
+
+    let r = data[idx] / 255;
+    let g = data[idx + 1] / 255;
+    let b = data[idx + 2] / 255;
+
+    const nx = x / radius;
+    const ny = y / radius;
+    const nz = z / radius;
+    const lightFactor = Math.max(0, nx * lightDir.x + ny * lightDir.y + nz * lightDir.z);
+    const shade = ambient + diffuse * lightFactor;
+
+    r *= shade;
+    g *= shade;
+    b *= shade;
+
+    colors[i] = r;
+    colors[i + 1] = g;
+    colors[i + 2] = b;
+  }
+
+  return colors;
+}
+
+/**
  * Generate particle positions from text
  * @param {string} text - Text to convert to particles
  * @param {number} particleCount - Number of particles to generate
