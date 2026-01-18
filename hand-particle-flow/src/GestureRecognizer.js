@@ -27,12 +27,14 @@ export class GestureRecognizer {
     const extendedFingers = this.countExtendedFingers(landmarks);
     const handCenter = this.getHandCenter(landmarks);
 
-    // Debug log for gesture detection
-    console.log('👆 Extended fingers:', extendedFingers);
+    // Only log when gesture changes
+    const currentGestureType = this._determineGestureType(extendedFingers);
+    if (currentGestureType !== this.previousGesture) {
+      console.log('👆 Fingers:', extendedFingers, '→ Gesture:', currentGestureType);
+    }
 
     // Fist (0-1 extended fingers) - scatter
     if (extendedFingers <= 1) {
-      console.log('✊ Detected: FIST');
       return {
         type: 'fist',
         data: handCenter
@@ -41,7 +43,6 @@ export class GestureRecognizer {
 
     // Open palm (5 fingers) - reform
     if (extendedFingers >= 5) {
-      console.log('🖐️ Detected: OPEN PALM');
       return {
         type: 'open_palm',
         data: handCenter
@@ -61,7 +62,6 @@ export class GestureRecognizer {
 
       this.previousHandCenter = handCenter;
 
-      console.log('👋 Detected: MOVE HAND (' + extendedFingers + ' fingers)');
       return {
         type: 'move_hand',
         data: {
@@ -73,8 +73,14 @@ export class GestureRecognizer {
     }
 
     // Default
-    console.log('❓ Unknown gesture');
     return { type: 'unknown', data: null };
+  }
+
+  _determineGestureType(extendedFingers) {
+    if (extendedFingers <= 1) return 'fist';
+    if (extendedFingers >= 5) return 'open_palm';
+    if (extendedFingers >= 2 && extendedFingers <= 4) return 'move_hand';
+    return 'unknown';
   }
 
   /**

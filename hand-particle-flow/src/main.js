@@ -18,6 +18,7 @@ let videoTexture, videoPlane;
 let gestureRecognizer;
 let previousGesture = null;
 let previousHandCenter = null;
+let lastLogTime = 0;
 
 // ==================== INITIALIZATION ====================
 
@@ -157,10 +158,23 @@ async function initMediaPipe() {
  * Handle MediaPipe hand detection results
  */
 function onHandResults(results) {
+  const now = Date.now();
+  const shouldLog = (now - lastLogTime) > 1000; // Log every 1 second
+
+  // Debug: log if hand is detected (throttled)
   if (!results.multiHandLandmarks || results.multiHandLandmarks.length === 0) {
+    if (shouldLog) {
+      console.log('⚠️ No hand detected');
+      lastLogTime = now;
+    }
     previousGesture = null;
     previousHandCenter = null;
     return;
+  }
+
+  if (shouldLog) {
+    console.log('✋ Hand detected!');
+    lastLogTime = now;
   }
 
   const landmarks = results.multiHandLandmarks[0];
@@ -179,9 +193,6 @@ function onHandResults(results) {
 function handleGesture(gesture, landmarks) {
   const worldRange = 10;
 
-  // Log current gesture and state
-  console.log('🎯 Handling gesture:', gesture.type, 'Previous:', previousGesture, 'Particle state:', particleSystem.currentState);
-
   switch (gesture.type) {
     case 'fist':
       // Scatter particles (only trigger once per gesture)
@@ -193,7 +204,7 @@ function handleGesture(gesture, landmarks) {
           worldRange
         );
         particleSystem.scatter(center);
-        console.log('✊ ACTION: Scattering particles from fist!');
+        console.log('✊ SCATTER! State:', particleSystem.currentState);
       }
       break;
 
@@ -201,7 +212,7 @@ function handleGesture(gesture, landmarks) {
       // Reform sphere (only trigger once per gesture)
       if (previousGesture !== 'open_palm') {
         particleSystem.reform();
-        console.log('🖐️ ACTION: Reforming Earth sphere with open palm!');
+        console.log('🖐️ REFORM! State:', particleSystem.currentState);
       }
       break;
 
@@ -219,7 +230,6 @@ function handleGesture(gesture, landmarks) {
         const magnitude = Math.sqrt(delta.x ** 2 + delta.y ** 2);
         if (magnitude > 0.1) {
           particleSystem.moveSphere(delta);
-          console.log('👋 ACTION: Moving sphere -', gesture.data.fingerCount, 'fingers, delta:', magnitude.toFixed(3));
         }
       }
       break;
@@ -231,7 +241,6 @@ function handleGesture(gesture, landmarks) {
 
   // Reset gesture state when switching gestures
   if (previousGesture !== gesture.type) {
-    console.log('🔄 Gesture changed from', previousGesture, 'to', gesture.type);
     previousHandCenter = null;
     gestureRecognizer.reset();
   }

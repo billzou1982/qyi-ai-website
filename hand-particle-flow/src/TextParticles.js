@@ -62,42 +62,42 @@ export function generateEarthSphere(radius, particleCount) {
     const isPolar = polarFactor > 0.77;
 
     if (isPolar) {
-      // Polar ice caps (white with slight blue tint)
-      const iceVariation = Math.random() * 0.1;
-      colors[i3] = 0.9 + iceVariation;      // R
-      colors[i3 + 1] = 0.95 + iceVariation * 0.5; // G
-      colors[i3 + 2] = 1.0;                  // B
+      // Polar ice caps (bright white, like satellite imagery)
+      colors[i3] = 1.0;      // R
+      colors[i3 + 1] = 1.0;  // G
+      colors[i3 + 2] = 1.0;  // B
     } else if (isLand) {
-      // Land elevation based on noise
+      // Land - simplified to be more visible
+      // Use darker greens and browns for better contrast with ocean
       const elevation = (continentNoise - landThreshold) / (1.0 - landThreshold);
 
-      if (elevation > 0.7) {
-        // High mountains (snow-capped, gray-brown)
-        const snowAmount = (elevation - 0.7) / 0.3;
-        colors[i3] = 0.5 + snowAmount * 0.4 + Math.random() * 0.1;     // R
-        colors[i3 + 1] = 0.45 + snowAmount * 0.5 + Math.random() * 0.05; // G
-        colors[i3 + 2] = 0.4 + snowAmount * 0.6;                        // B
-      } else if (elevation > 0.4) {
-        // Mid-elevation (forests/plains - green to yellow-green)
-        const forestDensity = Math.sin(lonNorm * 12.5 + latNorm * 8.3) * 0.5 + 0.5;
-        colors[i3] = 0.25 + forestDensity * 0.15 + Math.random() * 0.1;    // R
-        colors[i3 + 1] = 0.5 + forestDensity * 0.3 + Math.random() * 0.1;  // G
-        colors[i3 + 2] = 0.2 + Math.random() * 0.1;                        // B
-      } else {
-        // Low elevation (beaches, grasslands - yellow-green to tan)
+      if (elevation > 0.6) {
+        // Mountains (brown)
         colors[i3] = 0.6 + Math.random() * 0.2;      // R
-        colors[i3 + 1] = 0.55 + Math.random() * 0.15; // G
+        colors[i3 + 1] = 0.5 + Math.random() * 0.15; // G
         colors[i3 + 2] = 0.3 + Math.random() * 0.1;  // B
+      } else {
+        // Lowlands (green - forest/grassland)
+        colors[i3] = 0.2 + Math.random() * 0.15;     // R
+        colors[i3 + 1] = 0.6 + Math.random() * 0.2;  // G
+        colors[i3 + 2] = 0.2 + Math.random() * 0.1;  // B
       }
     } else {
-      // Ocean - depth variation based on distance from land
+      // Ocean - vivid blue for clear visibility
       const oceanDepth = Math.abs(continentNoise - landThreshold) / landThreshold;
-      const depthFactor = Math.min(oceanDepth * 1.5, 1.0);
+      const depthFactor = Math.min(oceanDepth * 1.8, 1.0);
 
-      // Deep ocean (dark blue) to shallow (lighter blue)
-      colors[i3] = 0.05 + (1 - depthFactor) * 0.2;         // R
-      colors[i3 + 1] = 0.2 + (1 - depthFactor) * 0.4;      // G
-      colors[i3 + 2] = 0.4 + (1 - depthFactor) * 0.4;      // B
+      if (depthFactor > 0.5) {
+        // Deep ocean (dark blue)
+        colors[i3] = 0.0;      // R
+        colors[i3 + 1] = 0.15; // G
+        colors[i3 + 2] = 0.5;  // B
+      } else {
+        // Shallow ocean (lighter blue-cyan)
+        colors[i3] = 0.1;      // R
+        colors[i3 + 1] = 0.4;  // G
+        colors[i3 + 2] = 0.7;  // B
+      }
     }
   }
 
