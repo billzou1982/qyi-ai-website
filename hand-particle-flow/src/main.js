@@ -9,7 +9,7 @@ import { Hands } from '@mediapipe/hands';
 import { Camera } from '@mediapipe/camera_utils';
 import { ParticleSystem } from './ParticleSystem.js';
 import { GestureRecognizer } from './GestureRecognizer.js';
-import { generateEarthSphere } from './TextParticles.js';
+import { generateEarthColorsFromTexture, generateEarthSphere } from './TextParticles.js';
 import { mapMediaPipeToThreeJS } from './Utils.js';
 
 // ==================== GLOBAL STATE ====================
@@ -19,6 +19,31 @@ let gestureRecognizer;
 let previousGesture = null;
 let previousHandCenter = null;
 let lastLogTime = 0;
+let earthRadius = 0;
+let earthPositions = null;
+
+// ==================== TEXTURE LOADING ====================
+
+function loadEarthTexture(url) {
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = image.width;
+      canvas.height = image.height;
+      ctx.drawImage(image, 0, 0);
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      resolve({
+        data: imageData.data,
+        width: canvas.width,
+        height: canvas.height
+      });
+    };
+    image.onerror = reject;
+    image.src = url;
+  });
+}
 
 // ==================== INITIALIZATION ====================
 
@@ -41,6 +66,7 @@ function initThreeJS() {
   });
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
 
   const container = document.getElementById('canvas-container');
   container.appendChild(renderer.domElement);
@@ -53,19 +79,35 @@ function initThreeJS() {
   const vFOV = THREE.MathUtils.degToRad(camera.fov);
   const viewportHeight = 2 * Math.tan(vFOV / 2) * camera.position.z;
   const sphereRadius = (viewportHeight / 5) / 2; // Diameter/5, then /2 for radius
+  earthRadius = sphereRadius;
 
   // Generate Earth sphere particles with realistic colors
   const particleCount = 6000; // Increased for better sphere coverage
   const earthData = generateEarthSphere(sphereRadius, particleCount);
+  earthPositions = earthData.positions;
 
   // Particle System with Earth sphere
   particleSystem = new ParticleSystem(
     particleCount,
     10,
-    earthData.positions,
+    earthPositions,
     earthData.colors
   );
   scene.add(particleSystem.getObject());
+
+  loadEarthTexture('/textures/earth_daymap.svg')
+    .then((textureData) => {
+      const texturedColors = generateEarthColorsFromTexture(
+        earthPositions,
+        earthRadius,
+        textureData
+      );
+      particleSystem.setColors(texturedColors);
+      console.log('✅ Earth texture applied');
+    })
+    .catch((error) => {
+      console.warn('⚠️ Failed to load Earth texture, using procedural colors.', error);
+    });
 
   // Gesture recognizer
   gestureRecognizer = new GestureRecognizer();

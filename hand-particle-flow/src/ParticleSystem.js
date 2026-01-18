@@ -95,12 +95,12 @@ export class ParticleSystem {
     );
 
     this.material = new THREE.PointsMaterial({
-      size: 0.15,
+      size: 0.12,
       vertexColors: true,
-      blending: THREE.AdditiveBlending,
+      blending: THREE.NormalBlending,
       transparent: true,
-      opacity: 0.9,
-      depthWrite: false,
+      opacity: 1.0,
+      depthWrite: true,
       sizeAttenuation: true
     });
 
@@ -234,6 +234,16 @@ export class ParticleSystem {
 
   getObject() {
     return this.points;
+  }
+
+  setColors(newColors) {
+    if (!newColors || newColors.length !== this.colors.length) {
+      return;
+    }
+
+    this.colors.set(newColors);
+    this.initialColors.set(newColors);
+    this.geometry.attributes.color.needsUpdate = true;
   }
 
   dispose() {
