@@ -179,9 +179,12 @@ function onHandResults(results) {
 function handleGesture(gesture, landmarks) {
   const worldRange = 10;
 
+  // Log current gesture and state
+  console.log('🎯 Handling gesture:', gesture.type, 'Previous:', previousGesture, 'Particle state:', particleSystem.currentState);
+
   switch (gesture.type) {
     case 'fist':
-      // Scatter particles
+      // Scatter particles (only trigger once per gesture)
       if (previousGesture !== 'fist') {
         const center = mapMediaPipeToThreeJS(
           gesture.data.x,
@@ -190,15 +193,15 @@ function handleGesture(gesture, landmarks) {
           worldRange
         );
         particleSystem.scatter(center);
-        console.log('✊ Fist: Scattered particles!');
+        console.log('✊ ACTION: Scattering particles from fist!');
       }
       break;
 
     case 'open_palm':
-      // Reform sphere
+      // Reform sphere (only trigger once per gesture)
       if (previousGesture !== 'open_palm') {
         particleSystem.reform();
-        console.log('🖐️ Open palm: Reforming Earth sphere!');
+        console.log('🖐️ ACTION: Reforming Earth sphere with open palm!');
       }
       break;
 
@@ -216,7 +219,7 @@ function handleGesture(gesture, landmarks) {
         const magnitude = Math.sqrt(delta.x ** 2 + delta.y ** 2);
         if (magnitude > 0.1) {
           particleSystem.moveSphere(delta);
-          console.log('👋 Moving sphere:', gesture.data.fingerCount, 'fingers');
+          console.log('👋 ACTION: Moving sphere -', gesture.data.fingerCount, 'fingers, delta:', magnitude.toFixed(3));
         }
       }
       break;
@@ -228,6 +231,7 @@ function handleGesture(gesture, landmarks) {
 
   // Reset gesture state when switching gestures
   if (previousGesture !== gesture.type) {
+    console.log('🔄 Gesture changed from', previousGesture, 'to', gesture.type);
     previousHandCenter = null;
     gestureRecognizer.reset();
   }

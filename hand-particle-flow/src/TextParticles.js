@@ -6,6 +6,7 @@
 /**
  * Generate particle positions for Earth sphere with realistic colors
  * Uses Fibonacci sphere distribution for even particle placement
+ * Mimics Google Earth appearance with realistic ocean/land distribution
  * @param {number} radius - Sphere radius
  * @param {number} particleCount - Number of particles to generate
  * @returns {Object} { positions: Float32Array, colors: Float32Array }
@@ -35,38 +36,68 @@ export function generateEarthSphere(radius, particleCount) {
     positions[i3 + 1] = y;
     positions[i3 + 2] = z;
 
-    // Generate Earth-like colors based on latitude and noise
-    // Use y-coordinate (latitude) and some randomness for landmass distribution
-    const latitude = y / radius; // -1 to 1
-    const noise = Math.sin(x * 3.5) * Math.cos(z * 3.5) + Math.sin(y * 2.7);
+    // Calculate latitude and longitude for realistic Earth mapping
+    const lat = Math.asin(y / radius); // -PI/2 to PI/2
+    const lon = Math.atan2(z, x);      // -PI to PI
 
-    // Determine if ocean or land based on latitude and noise
-    const isLand = noise > 0.1 - Math.abs(latitude) * 0.3;
+    // Normalize to 0-1 range
+    const latNorm = (lat + Math.PI / 2) / Math.PI; // 0 at south pole, 1 at north pole
+    const lonNorm = (lon + Math.PI) / (2 * Math.PI);
 
-    if (isLand) {
-      // Land: varies from green (low) to brown (high) to white (polar)
-      if (Math.abs(latitude) > 0.7) {
-        // Polar ice caps (white/light blue)
-        colors[i3] = 0.9 + Math.random() * 0.1;     // R
-        colors[i3 + 1] = 0.95 + Math.random() * 0.05; // G
-        colors[i3 + 2] = 1.0;                        // B
-      } else if (noise > 0.5) {
-        // Mountains (brown/gray)
-        colors[i3] = 0.5 + Math.random() * 0.2;     // R
-        colors[i3 + 1] = 0.4 + Math.random() * 0.1; // G
-        colors[i3 + 2] = 0.3 + Math.random() * 0.1; // B
+    // Multi-octave noise for realistic continents
+    // Combine multiple frequencies for natural landmass shapes
+    const noise1 = Math.sin(x * 2.8 + z * 1.3) * Math.cos(y * 2.1);
+    const noise2 = Math.sin(x * 5.2) * Math.cos(z * 4.8) * 0.5;
+    const noise3 = Math.sin(y * 8.5 + x * 3.2) * 0.25;
+    const continentNoise = noise1 + noise2 + noise3;
+
+    // Latitude-based bias: more ocean near equator, ice at poles
+    const polarFactor = Math.abs(latNorm - 0.5) * 2; // 0 at equator, 1 at poles
+
+    // Land/ocean threshold (aim for ~30% land, 70% ocean)
+    const landThreshold = 0.2 - polarFactor * 0.15;
+    const isLand = continentNoise > landThreshold;
+
+    // Polar regions (latitude > 70° or < -70°)
+    const isPolar = polarFactor > 0.77;
+
+    if (isPolar) {
+      // Polar ice caps (white with slight blue tint)
+      const iceVariation = Math.random() * 0.1;
+      colors[i3] = 0.9 + iceVariation;      // R
+      colors[i3 + 1] = 0.95 + iceVariation * 0.5; // G
+      colors[i3 + 2] = 1.0;                  // B
+    } else if (isLand) {
+      // Land elevation based on noise
+      const elevation = (continentNoise - landThreshold) / (1.0 - landThreshold);
+
+      if (elevation > 0.7) {
+        // High mountains (snow-capped, gray-brown)
+        const snowAmount = (elevation - 0.7) / 0.3;
+        colors[i3] = 0.5 + snowAmount * 0.4 + Math.random() * 0.1;     // R
+        colors[i3 + 1] = 0.45 + snowAmount * 0.5 + Math.random() * 0.05; // G
+        colors[i3 + 2] = 0.4 + snowAmount * 0.6;                        // B
+      } else if (elevation > 0.4) {
+        // Mid-elevation (forests/plains - green to yellow-green)
+        const forestDensity = Math.sin(lonNorm * 12.5 + latNorm * 8.3) * 0.5 + 0.5;
+        colors[i3] = 0.25 + forestDensity * 0.15 + Math.random() * 0.1;    // R
+        colors[i3 + 1] = 0.5 + forestDensity * 0.3 + Math.random() * 0.1;  // G
+        colors[i3 + 2] = 0.2 + Math.random() * 0.1;                        // B
       } else {
-        // Vegetation (green)
-        colors[i3] = 0.2 + Math.random() * 0.2;     // R
-        colors[i3 + 1] = 0.6 + Math.random() * 0.2; // G
-        colors[i3 + 2] = 0.2 + Math.random() * 0.1; // B
+        // Low elevation (beaches, grasslands - yellow-green to tan)
+        colors[i3] = 0.6 + Math.random() * 0.2;      // R
+        colors[i3 + 1] = 0.55 + Math.random() * 0.15; // G
+        colors[i3 + 2] = 0.3 + Math.random() * 0.1;  // B
       }
     } else {
-      // Ocean: deep blue to light blue
-      const depth = 0.3 + Math.random() * 0.4;
-      colors[i3] = 0.0 + depth * 0.2;               // R
-      colors[i3 + 1] = 0.2 + depth * 0.5;           // G
-      colors[i3 + 2] = 0.5 + depth * 0.5;           // B
+      // Ocean - depth variation based on distance from land
+      const oceanDepth = Math.abs(continentNoise - landThreshold) / landThreshold;
+      const depthFactor = Math.min(oceanDepth * 1.5, 1.0);
+
+      // Deep ocean (dark blue) to shallow (lighter blue)
+      colors[i3] = 0.05 + (1 - depthFactor) * 0.2;         // R
+      colors[i3 + 1] = 0.2 + (1 - depthFactor) * 0.4;      // G
+      colors[i3 + 2] = 0.4 + (1 - depthFactor) * 0.4;      // B
     }
   }
 
