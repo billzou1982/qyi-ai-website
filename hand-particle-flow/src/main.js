@@ -17,6 +17,7 @@ let scene, camera, renderer, particleSystem;
 let videoTexture, videoPlane;
 let gestureRecognizer;
 let previousGesture = null;
+let previousGestureStable = false;
 let previousHandCenter = null;
 let lastLogTime = 0;
 let earthRadius = 0;
@@ -24,24 +25,57 @@ let earthPositions = null;
 
 // ==================== TEXTURE LOADING ====================
 
-function loadEarthTexture(url) {
+function loadEarthTexture(urls) {
+  const sourceList = Array.isArray(urls) ? urls : [urls];
+
   return new Promise((resolve, reject) => {
-    const image = new Image();
-    image.onload = () => {
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      canvas.width = image.width;
-      canvas.height = image.height;
-      ctx.drawImage(image, 0, 0);
-      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      resolve({
-        data: imageData.data,
-        width: canvas.width,
-        height: canvas.height
-      });
+    let currentIndex = 0;
+
+    const loadNext = () => {
+      if (currentIndex >= sourceList.length) {
+        reject(new Error('No texture sources loaded.'));
+        return;
+      }
+
+      const image = new Image();
+      image.crossOrigin = 'anonymous';
+      image.onload = () => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = image.width;
+        canvas.height = image.height;
+        ctx.drawImage(image, 0, 0);
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        resolve({
+          data: imageData.data,
+          width: canvas.width,
+          height: canvas.height
+        });
+      };
+      image.onerror = () => {
+        currentIndex += 1;
+        loadNext();
+      };
+      image.src = sourceList[currentIndex];
     };
-    image.onerror = reject;
-    image.src = url;
+
+    loadNext();
+  });
+}
+
+function updateSphereBounds() {
+  const vFOV = THREE.MathUtils.degToRad(camera.fov);
+  const viewportHeight = 2 * Math.tan(vFOV / 2) * camera.position.z;
+  const viewportWidth = viewportHeight * camera.aspect;
+
+  const maxX = Math.max(0, viewportWidth / 2 - earthRadius);
+  const maxY = Math.max(0, viewportHeight / 2 - earthRadius);
+
+  particleSystem.setBounds({
+    minX: -maxX,
+    maxX,
+    minY: -maxY,
+    maxY
   });
 }
 
@@ -95,7 +129,10 @@ function initThreeJS() {
   );
   scene.add(particleSystem.getObject());
 
-  loadEarthTexture('/textures/earth_daymap.svg')
+  loadEarthTexture([
+    'https://unpkg.com/three@0.182.0/examples/textures/planets/earth_atmos_2048.jpg',
+    '/textures/earth_daymap.svg'
+  ])
     .then((textureData) => {
       const texturedColors = generateEarthColorsFromTexture(
         earthPositions,
@@ -111,6 +148,8 @@ function initThreeJS() {
 
   // Gesture recognizer
   gestureRecognizer = new GestureRecognizer();
+
+  updateSphereBounds();
 
   // Handle window resize
   window.addEventListener('resize', onWindowResize);
@@ -238,11 +277,11 @@ function handleGesture(gesture, landmarks) {
   switch (gesture.type) {
     case 'fist':
       // Scatter particles (only trigger once per gesture)
-      if (previousGesture !== 'fist') {
+      if (gesture.data?.isStable && (previousGesture !== 'fist' || !previousGestureStable)) {
         const center = mapMediaPipeToThreeJS(
-          gesture.data.x,
-          gesture.data.y,
-          gesture.data.z,
+          gesture.data.center.x,
+          gesture.data.center.y,
+          gesture.data.center.z,
           worldRange
         );
         particleSystem.scatter(center);
@@ -252,7 +291,7 @@ function handleGesture(gesture, landmarks) {
 
     case 'open_palm':
       // Reform sphere (only trigger once per gesture)
-      if (previousGesture !== 'open_palm') {
+      if (gesture.data?.isStable && (previousGesture !== 'open_palm' || !previousGestureStable)) {
         particleSystem.reform();
         console.log('🖐️ REFORM! State:', particleSystem.currentState);
       }
@@ -285,9 +324,11 @@ function handleGesture(gesture, landmarks) {
   if (previousGesture !== gesture.type) {
     previousHandCenter = null;
     gestureRecognizer.reset();
+    previousGestureStable = false;
   }
 
   previousGesture = gesture.type;
+  previousGestureStable = Boolean(gesture.data?.isStable);
 }
 
 /**
@@ -309,6 +350,8 @@ function onWindowResize() {
     videoPlane.geometry.dispose();
     videoPlane.geometry = new THREE.PlaneGeometry(width, height);
   }
+
+  updateSphereBounds();
 }
 
 // ==================== ANIMATION LOOP ====================

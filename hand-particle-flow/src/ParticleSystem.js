@@ -19,6 +19,7 @@ export class ParticleSystem {
     this.sphereOffset = new THREE.Vector3(0, 0, 0);  // Sphere position offset
     this.sphereScale = 1.0;                          // Sphere scale
     this.targetScale = 1.0;
+    this.bounds = null;
 
     // Physics parameters
     this.params = {
@@ -94,6 +95,8 @@ export class ParticleSystem {
       new THREE.BufferAttribute(this.colors, 3)
     );
 
+    const pointTexture = this.createPointTexture();
+
     this.material = new THREE.PointsMaterial({
       size: 0.12,
       vertexColors: true,
@@ -101,6 +104,9 @@ export class ParticleSystem {
       transparent: true,
       opacity: 1.0,
       depthWrite: true,
+      alphaMap: pointTexture,
+      map: pointTexture,
+      alphaTest: 0.5,
       sizeAttenuation: true
     });
 
@@ -162,6 +168,17 @@ export class ParticleSystem {
 
     // Smoothly interpolate scale
     this.sphereScale += (this.targetScale - this.sphereScale) * 0.1;
+
+    if (this.bounds) {
+      this.sphereOffset.x = Math.min(
+        this.bounds.maxX,
+        Math.max(this.bounds.minX, this.sphereOffset.x)
+      );
+      this.sphereOffset.y = Math.min(
+        this.bounds.maxY,
+        Math.max(this.bounds.minY, this.sphereOffset.y)
+      );
+    }
 
     for (let i = 0; i < count; i++) {
       const i3 = i * 3;
@@ -234,6 +251,37 @@ export class ParticleSystem {
 
   getObject() {
     return this.points;
+  }
+
+  createPointTexture() {
+    const size = 64;
+    const canvas = document.createElement('canvas');
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext('2d');
+
+    const gradient = ctx.createRadialGradient(
+      size / 2,
+      size / 2,
+      0,
+      size / 2,
+      size / 2,
+      size / 2
+    );
+    gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
+    gradient.addColorStop(0.4, 'rgba(255, 255, 255, 0.9)');
+    gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, size, size);
+
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.needsUpdate = true;
+    return texture;
+  }
+
+  setBounds(bounds) {
+    this.bounds = bounds;
   }
 
   setColors(newColors) {
