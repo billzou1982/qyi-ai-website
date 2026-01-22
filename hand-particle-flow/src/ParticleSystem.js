@@ -98,15 +98,13 @@ export class ParticleSystem {
     const pointTexture = this.createPointTexture();
 
     this.material = new THREE.PointsMaterial({
-      size: 0.12,
+      size: 0.2, // Increased size for better visibility
       vertexColors: true,
-      blending: THREE.NormalBlending,
+      blending: THREE.AdditiveBlending, // Glow effect
       transparent: true,
-      opacity: 1.0,
-      depthWrite: true,
-      alphaMap: pointTexture,
+      opacity: 0.8,
+      depthWrite: false, // Prevent black boxes
       map: pointTexture,
-      alphaTest: 0.5,
       sizeAttenuation: true
     });
 
@@ -134,16 +132,16 @@ export class ParticleSystem {
    */
   scatter(center) {
     this.currentState = this.STATE_SCATTERED;
-    
+
     const count = this.particleCount;
     for (let i = 0; i < count; i++) {
       const i3 = i * 3;
-      
+
       // Random direction from center
       const angle = Math.random() * Math.PI * 2;
       const elevation = (Math.random() - 0.5) * Math.PI;
       const force = this.params.scatterForce * (0.5 + Math.random() * 0.5);
-      
+
       this.velocities[i3] += Math.cos(angle) * Math.cos(elevation) * force;
       this.velocities[i3 + 1] += Math.sin(elevation) * force;
       this.velocities[i3 + 2] += Math.sin(angle) * Math.cos(elevation) * force;
@@ -169,15 +167,11 @@ export class ParticleSystem {
     // Smoothly interpolate scale
     this.sphereScale += (this.targetScale - this.sphereScale) * 0.1;
 
+    // Strict boundary locking with smooth resistance
     if (this.bounds) {
-      this.sphereOffset.x = Math.min(
-        this.bounds.maxX,
-        Math.max(this.bounds.minX, this.sphereOffset.x)
-      );
-      this.sphereOffset.y = Math.min(
-        this.bounds.maxY,
-        Math.max(this.bounds.minY, this.sphereOffset.y)
-      );
+      const margin = 0.5; // Padding from edge
+      this.sphereOffset.x = Math.max(this.bounds.minX + margin, Math.min(this.bounds.maxX - margin, this.sphereOffset.x));
+      this.sphereOffset.y = Math.max(this.bounds.minY + margin, Math.min(this.bounds.maxY - margin, this.sphereOffset.y));
     }
 
     for (let i = 0; i < count; i++) {
@@ -254,22 +248,21 @@ export class ParticleSystem {
   }
 
   createPointTexture() {
-    const size = 64;
+    const size = 128; // Higher resolution
     const canvas = document.createElement('canvas');
     canvas.width = size;
     canvas.height = size;
     const ctx = canvas.getContext('2d');
 
     const gradient = ctx.createRadialGradient(
-      size / 2,
-      size / 2,
-      0,
-      size / 2,
-      size / 2,
-      size / 2
+      size / 2, size / 2, 0,
+      size / 2, size / 2, size / 2
     );
+
+    // Softer gradient for "Google Earth" particle feel
     gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
-    gradient.addColorStop(0.4, 'rgba(255, 255, 255, 0.9)');
+    gradient.addColorStop(0.2, 'rgba(255, 255, 255, 0.8)');
+    gradient.addColorStop(0.5, 'rgba(255, 255, 255, 0.3)');
     gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
 
     ctx.fillStyle = gradient;

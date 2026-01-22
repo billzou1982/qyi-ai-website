@@ -193,7 +193,7 @@ function createVideoBackground(videoElement) {
   scene.add(videoPlane);
 
   console.log('✅ Video background created:', width.toFixed(2), 'x', height.toFixed(2),
-              'distance:', distanceFromCamera);
+    'distance:', distanceFromCamera);
 }
 
 /**
@@ -276,8 +276,8 @@ function handleGesture(gesture, landmarks) {
 
   switch (gesture.type) {
     case 'fist':
-      // Scatter particles (only trigger once per gesture)
-      if (gesture.data?.isStable && (previousGesture !== 'fist' || !previousGestureStable)) {
+      // Scatter particles (trigger once per gesture switch)
+      if (previousGesture !== 'fist') {
         const center = mapMediaPipeToThreeJS(
           gesture.data.center.x,
           gesture.data.center.y,
@@ -290,8 +290,8 @@ function handleGesture(gesture, landmarks) {
       break;
 
     case 'open_palm':
-      // Reform sphere (only trigger once per gesture)
-      if (gesture.data?.isStable && (previousGesture !== 'open_palm' || !previousGestureStable)) {
+      // Reform sphere (trigger once per gesture switch)
+      if (previousGesture !== 'open_palm') {
         particleSystem.reform();
         console.log('🖐️ REFORM! State:', particleSystem.currentState);
       }
