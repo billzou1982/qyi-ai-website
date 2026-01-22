@@ -8,7 +8,7 @@ export class GestureRecognizer {
     this.previousGesture = null;
     this.previousHandCenter = null;
     this.gestureStartTime = null;
-    this.gestureStableThreshold = 100; // Reduced from 300ms for snappier response
+    this.gestureStableThreshold = 250; // V3: Increased for reliability against false positives
   }
 
   /**

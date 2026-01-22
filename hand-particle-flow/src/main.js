@@ -106,14 +106,14 @@ function initThreeJS() {
   const container = document.getElementById('canvas-container');
   container.appendChild(renderer.domElement);
 
-  // Calculate sphere radius to occupy 40% of screen height
+  // Calculate sphere radius to occupy 50% of screen height
   const vFOV = THREE.MathUtils.degToRad(camera.fov);
   const viewportHeight = 2 * Math.tan(vFOV / 2) * camera.position.z;
-  const sphereRadius = (viewportHeight * 0.4) / 2; // 40% of height / 2 for radius
+  const sphereRadius = (viewportHeight * 0.5) / 2; // 50% of height / 2 for radius
   earthRadius = sphereRadius;
 
-  // Generate high-density Google Earth sphere particles
-  const particleCount = 30000; // High density for realism
+  // Generate V3 Ultra-density Google Earth sphere particles
+  const particleCount = 45000;
   const earthData = generateEarthSphere(sphereRadius, particleCount);
   earthPositions = earthData.positions;
 
@@ -273,24 +273,28 @@ function handleGesture(gesture, landmarks) {
 
   switch (gesture.type) {
     case 'fist':
-      // Scatter particles (trigger once per gesture switch)
-      if (previousGesture !== 'fist') {
+      // V3: REQUIRE STABILITY to prevent accidental explosions
+      if (gesture.data?.isStable && previousGesture !== 'fist') {
         const center = mapMediaPipeToThreeJS(
           gesture.data.center.x,
           gesture.data.center.y,
           gesture.data.center.z,
           worldRange
         );
-        particleSystem.scatter(center);
-        console.log('✊ SCATTER! State:', particleSystem.currentState);
+
+        // V3: Sanity check coordinates - avoid snapping to (0,0) if hand is lost
+        if (Math.abs(gesture.data.center.x - 0.5) < 0.45 && Math.abs(gesture.data.center.y - 0.5) < 0.45) {
+          particleSystem.scatter(center);
+          console.log('✊ SCATTER! (Stable trigger)');
+        }
       }
       break;
 
     case 'open_palm':
-      // Reform sphere (trigger once per gesture switch)
-      if (previousGesture !== 'open_palm') {
+      // V3: REQUIRE STABILITY
+      if (gesture.data?.isStable && previousGesture !== 'open_palm') {
         particleSystem.reform();
-        console.log('🖐️ REFORM! State:', particleSystem.currentState);
+        console.log('🖐️ REFORM! (Stable trigger)');
       }
       break;
 

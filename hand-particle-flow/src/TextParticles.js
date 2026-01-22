@@ -19,6 +19,9 @@ export function generateEarthSphere(radius, particleCount) {
   const goldenRatio = (1 + Math.sqrt(5)) / 2;
   const angleIncrement = Math.PI * 2 * goldenRatio;
 
+  // V3: Distinct layers. 10% Atmosphere, 90% Surface
+  const atmosphereCount = Math.floor(particleCount * 0.15);
+
   for (let i = 0; i < particleCount; i++) {
     const i3 = i * 3;
 
@@ -27,9 +30,11 @@ export function generateEarthSphere(radius, particleCount) {
     const inclination = Math.acos(1 - 2 * t);
     const azimuth = angleIncrement * i;
 
-    // Create atmosphere - 5% of particles are slightly outside the sphere
-    const isAtmosphere = i > particleCount * 0.95;
-    const currentRadius = isAtmosphere ? radius * 1.05 : radius;
+    // V3: Atmosphere particles are slightly larger and have variations in depth
+    const isAtmosphere = i < atmosphereCount;
+    const currentRadius = isAtmosphere
+      ? radius * (1.02 + Math.random() * 0.05)
+      : radius;
 
     // Convert spherical to Cartesian coordinates
     const x = currentRadius * Math.sin(inclination) * Math.cos(azimuth);
@@ -41,30 +46,27 @@ export function generateEarthSphere(radius, particleCount) {
     positions[i3 + 2] = z;
 
     if (isAtmosphere) {
-      // Atmospheric glow: faint blue/cyan
-      colors[i3] = 0.2;
-      colors[i3 + 1] = 0.5;
-      colors[i3 + 2] = 1.0;
+      // Atmospheric glow: soft cyan-blue with variable opacity (handled by color intensity)
+      colors[i3] = 0.1;
+      colors[i3 + 1] = 0.4;
+      colors[i3 + 2] = 0.8;
       continue;
     }
 
-    // Procedural Fallback (if texture fails)
+    // Default Surface Colors (will be overridden by texture if available)
     const lat = Math.asin(y / radius);
     const latNorm = (lat + Math.PI / 2) / Math.PI;
-    const noise1 = Math.sin(x * 2.8 + z * 1.3) * Math.cos(y * 2.1);
-    const noise2 = Math.sin(x * 5.2) * Math.cos(z * 4.8) * 0.5;
-    const continentNoise = noise1 + noise2;
+    const noise1 = Math.sin(x * 3.0 + z * 1.5) * Math.cos(y * 2.5);
+    const continentNoise = noise1;
     const polarFactor = Math.abs(latNorm - 0.5) * 2;
-    const landThreshold = 0.2 - polarFactor * 0.15;
-    const isLand = continentNoise > landThreshold;
-    const isPolar = polarFactor > 0.77;
+    const landThreshold = 0.1;
 
-    if (isPolar) {
-      colors[i3] = 1.0; colors[i3 + 1] = 1.0; colors[i3 + 2] = 1.0;
-    } else if (isLand) {
-      colors[i3] = 0.2; colors[i3 + 1] = 0.5; colors[i3 + 2] = 0.1;
+    if (polarFactor > 0.85) {
+      colors[i3] = 0.9; colors[i3 + 1] = 0.9; colors[i3 + 2] = 1.0;
+    } else if (continentNoise > landThreshold) {
+      colors[i3] = 0.2; colors[i3 + 1] = 0.4; colors[i3 + 2] = 0.15;
     } else {
-      colors[i3] = 0.0; colors[i3 + 1] = 0.2; colors[i3 + 2] = 0.8;
+      colors[i3] = 0.0; colors[i3 + 1] = 0.1; colors[i3 + 2] = 0.5;
     }
   }
 

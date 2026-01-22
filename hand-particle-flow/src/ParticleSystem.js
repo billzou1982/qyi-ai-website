@@ -18,6 +18,7 @@ export class ParticleSystem {
     // Transform properties
     this.sphereOffset = new THREE.Vector3(0, 0, 0);  // Sphere position offset
     this.targetPosition = new THREE.Vector3(0, 0, 0); // V2: Hand direct mapping target
+    this.lastTargetUpdateTime = 0;                   // V3: For center fallback
     this.sphereScale = 1.0;                          // Sphere scale
     this.targetScale = 1.0;
     this.bounds = null;
@@ -103,12 +104,12 @@ export class ParticleSystem {
     const pointTexture = this.createPointTexture();
 
     this.material = new THREE.PointsMaterial({
-      size: 0.05, // V2: Smaller particles for 30k density
+      size: 0.04, // V3: Extremely small particles for photo-realism
       vertexColors: true,
-      blending: THREE.AdditiveBlending, // Maintain some glow but keep it subtle
+      blending: THREE.NormalBlending, // Avoid glob look, use lighting for vibrancy
       transparent: true,
-      opacity: 0.7, // Slightly lower opacity to prevent "blob" feel
-      depthWrite: false,
+      opacity: 0.9,
+      depthWrite: true,
       map: pointTexture,
       sizeAttenuation: true
     });
@@ -121,6 +122,7 @@ export class ParticleSystem {
    */
   setTargetPosition(pos) {
     this.targetPosition.copy(pos);
+    this.lastTargetUpdateTime = Date.now();
   }
 
   /**
@@ -177,9 +179,16 @@ export class ParticleSystem {
     const colorAttr = this.geometry.attributes.color;
 
     // V2: Directly lerp sphereOffset to targetPosition for 1:1 hand tracking
-    this.sphereOffset.x += (this.targetPosition.x - this.sphereOffset.x) * this.params.lerpFactor;
-    this.sphereOffset.y += (this.targetPosition.y - this.sphereOffset.y) * this.params.lerpFactor;
-    this.sphereOffset.z += (this.targetPosition.z - this.sphereOffset.z) * this.params.lerpFactor;
+    // V3: Check if target was recently updated; if not, return to center
+    const now = Date.now();
+    const handLost = (now - this.lastTargetUpdateTime) > 500; // 500ms fallback
+
+    const actualTarget = handLost ? new THREE.Vector3(0, 0, 0) : this.targetPosition;
+    const currentLerp = handLost ? 0.05 : this.params.lerpFactor; // Slower return to center
+
+    this.sphereOffset.x += (actualTarget.x - this.sphereOffset.x) * currentLerp;
+    this.sphereOffset.y += (actualTarget.y - this.sphereOffset.y) * currentLerp;
+    this.sphereOffset.z += (actualTarget.z - this.sphereOffset.z) * currentLerp;
 
     // Strict boundary locking with smooth resistance
     if (this.bounds) {
