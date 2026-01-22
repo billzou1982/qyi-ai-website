@@ -68,8 +68,9 @@ function updateSphereBounds() {
   const viewportHeight = 2 * Math.tan(vFOV / 2) * camera.position.z;
   const viewportWidth = viewportHeight * camera.aspect;
 
-  const maxX = Math.max(0, viewportWidth / 2 - earthRadius);
-  const maxY = Math.max(0, viewportHeight / 2 - earthRadius);
+  // V2: Strict bounding - sphere radius must stay inside viewport
+  const maxX = Math.max(0, viewportWidth / 2 - earthRadius * 1.1);
+  const maxY = Math.max(0, viewportHeight / 2 - earthRadius * 1.1);
 
   particleSystem.setBounds({
     minX: -maxX,
@@ -105,18 +106,14 @@ function initThreeJS() {
   const container = document.getElementById('canvas-container');
   container.appendChild(renderer.domElement);
 
-  // Calculate sphere radius to occupy 1/5 of screen height
-  // At camera.position.z = 15 with FOV = 75°:
-  // viewport height = 2 * tan(FOV/2) * distance ≈ 22.2
-  // sphere diameter should be 22.2 / 5 ≈ 4.44
-  // sphere radius ≈ 2.2
+  // Calculate sphere radius to occupy 40% of screen height
   const vFOV = THREE.MathUtils.degToRad(camera.fov);
   const viewportHeight = 2 * Math.tan(vFOV / 2) * camera.position.z;
-  const sphereRadius = (viewportHeight / 5) / 2; // Diameter/5, then /2 for radius
+  const sphereRadius = (viewportHeight * 0.4) / 2; // 40% of height / 2 for radius
   earthRadius = sphereRadius;
 
-  // Generate Earth sphere particles with realistic colors
-  const particleCount = 6000; // Increased for better sphere coverage
+  // Generate high-density Google Earth sphere particles
+  const particleCount = 30000; // High density for realism
   const earthData = generateEarthSphere(sphereRadius, particleCount);
   earthPositions = earthData.positions;
 
@@ -298,20 +295,17 @@ function handleGesture(gesture, landmarks) {
       break;
 
     case 'move_hand':
-      // Move sphere with hand movement (2-4 fingers)
-      if (gesture.data && gesture.data.delta) {
-        const delta = mapMediaPipeToThreeJS(
-          gesture.data.delta.x,
-          gesture.data.delta.y,
-          gesture.data.delta.z,
+      // Direct position mapping (1:1 with hand center)
+      if (gesture.data && gesture.data.center) {
+        const targetPos = mapMediaPipeToThreeJS(
+          gesture.data.center.x,
+          gesture.data.center.y,
+          gesture.data.center.z,
           worldRange
         );
 
-        // Only move if delta is significant (avoid jitter)
-        const magnitude = Math.sqrt(delta.x ** 2 + delta.y ** 2);
-        if (magnitude > 0.1) {
-          particleSystem.moveSphere(delta);
-        }
+        // Directly set position (ParticleSystem will handle lerp internally if needed or we do it here)
+        particleSystem.setTargetPosition(targetPos);
       }
       break;
 

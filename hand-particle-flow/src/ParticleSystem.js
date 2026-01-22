@@ -17,16 +17,21 @@ export class ParticleSystem {
 
     // Transform properties
     this.sphereOffset = new THREE.Vector3(0, 0, 0);  // Sphere position offset
+    this.targetPosition = new THREE.Vector3(0, 0, 0); // V2: Hand direct mapping target
     this.sphereScale = 1.0;                          // Sphere scale
     this.targetScale = 1.0;
     this.bounds = null;
 
+    // V2 Lighting
+    this.lightSource = new THREE.Vector3(-0.3, 0.2, 1.0).normalize();
+
     // Physics parameters
     this.params = {
-      homeForce: 0.25,          // Strength of return to sphere position (increased 5x for faster recovery)
-      scatterForce: 2.0,        // Force when scattering
-      friction: 0.92,           // Velocity damping
-      maxVelocity: 2.5,         // Maximum particle velocity (increased for faster movement)
+      homeForce: 0.15,          // Softer recovery for V2
+      scatterForce: 2.5,        // Stronger scatter
+      friction: 0.90,           // More friction for precision
+      maxVelocity: 3.0,         // Faster movement allowed
+      lerpFactor: 0.15,         // Smoothing factor for direct mapping
     };
 
     // Initialize particle data
@@ -98,17 +103,24 @@ export class ParticleSystem {
     const pointTexture = this.createPointTexture();
 
     this.material = new THREE.PointsMaterial({
-      size: 0.2, // Increased size for better visibility
+      size: 0.05, // V2: Smaller particles for 30k density
       vertexColors: true,
-      blending: THREE.AdditiveBlending, // Glow effect
+      blending: THREE.AdditiveBlending, // Maintain some glow but keep it subtle
       transparent: true,
-      opacity: 0.8,
-      depthWrite: false, // Prevent black boxes
+      opacity: 0.7, // Slightly lower opacity to prevent "blob" feel
+      depthWrite: false,
       map: pointTexture,
       sizeAttenuation: true
     });
 
     this.points = new THREE.Points(this.geometry, this.material);
+  }
+
+  /**
+   * Set target position for the sphere (handled in update via lerp)
+   */
+  setTargetPosition(pos) {
+    this.targetPosition.copy(pos);
   }
 
   /**
@@ -164,8 +176,10 @@ export class ParticleSystem {
     const posAttr = this.geometry.attributes.position;
     const colorAttr = this.geometry.attributes.color;
 
-    // Smoothly interpolate scale
-    this.sphereScale += (this.targetScale - this.sphereScale) * 0.1;
+    // V2: Directly lerp sphereOffset to targetPosition for 1:1 hand tracking
+    this.sphereOffset.x += (this.targetPosition.x - this.sphereOffset.x) * this.params.lerpFactor;
+    this.sphereOffset.y += (this.targetPosition.y - this.sphereOffset.y) * this.params.lerpFactor;
+    this.sphereOffset.z += (this.targetPosition.z - this.sphereOffset.z) * this.params.lerpFactor;
 
     // Strict boundary locking with smooth resistance
     if (this.bounds) {
@@ -173,6 +187,10 @@ export class ParticleSystem {
       this.sphereOffset.x = Math.max(this.bounds.minX + margin, Math.min(this.bounds.maxX - margin, this.sphereOffset.x));
       this.sphereOffset.y = Math.max(this.bounds.minY + margin, Math.min(this.bounds.maxY - margin, this.sphereOffset.y));
     }
+
+    // Dynamic shading parameters
+    const ambient = 0.15;
+    const diffuse = 0.85;
 
     for (let i = 0; i < count; i++) {
       const i3 = i * 3;
@@ -192,10 +210,20 @@ export class ParticleSystem {
         this.velocities[i3 + 1] += dy * this.params.homeForce;
         this.velocities[i3 + 2] += dz * this.params.homeForce;
 
-        // Keep original Earth colors when formed
-        this.colors[i3] = this.initialColors[i3];
-        this.colors[i3 + 1] = this.initialColors[i3 + 1];
-        this.colors[i3 + 2] = this.initialColors[i3 + 2];
+        // V2: Dynamic Shading (Day/Night side)
+        // Only apply to atmosphere/outer particles if needed or to all
+        const nx = this.textPositions[i3]; // Normalized position (since original radius is fixed)
+        const ny = this.textPositions[i3 + 1];
+        const nz = this.textPositions[i3 + 2];
+
+        // Simplified dot product for shading
+        const lightLen = Math.sqrt(nx * nx + ny * ny + nz * nz) || 1;
+        const lightFactor = Math.max(0, (nx / lightLen) * this.lightSource.x + (ny / lightLen) * this.lightSource.y + (nz / lightLen) * this.lightSource.z);
+        const shade = ambient + diffuse * lightFactor;
+
+        this.colors[i3] = this.initialColors[i3] * shade;
+        this.colors[i3 + 1] = this.initialColors[i3 + 1] * shade;
+        this.colors[i3 + 2] = this.initialColors[i3 + 2] * shade;
 
       } else if (this.currentState === this.STATE_SCATTERED) {
         // In scattered mode, particles fly freely
