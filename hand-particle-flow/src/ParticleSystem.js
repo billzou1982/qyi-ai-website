@@ -10,29 +10,32 @@ export class ParticleSystem {
     this.particleCount = particleCount;
     this.worldRange = worldRange;
 
-    // Particle states
-    this.STATE_FORMED = 'formed';      // Sphere is formed and static
-    this.STATE_SCATTERED = 'scattered'; // Particles are scattered
-    this.currentState = this.STATE_FORMED;
+    // V4: States
+    this.STATE_SOLID = 'solid';
+    this.STATE_SHATTERING = 'shattering';
+    this.STATE_SHATTERED = 'shattered';
+    this.STATE_REFORMING = 'reforming';
+    this.currentState = this.STATE_SOLID;
 
     // Transform properties
-    this.sphereOffset = new THREE.Vector3(0, 0, 0);  // Sphere position offset
-    this.targetPosition = new THREE.Vector3(0, 0, 0); // V2: Hand direct mapping target
-    this.lastTargetUpdateTime = 0;                   // V3: For center fallback
-    this.sphereScale = 1.0;                          // Sphere scale
-    this.targetScale = 1.0;
+    this.sphereOffset = new THREE.Vector3(0, 0, 0);
+    this.targetPosition = new THREE.Vector3(0, 0, 0);
+    this.lastTargetUpdateTime = 0;
+    this.sphereRadius = 1.0; // Updated later
+    this.sphereScale = 1.0;
     this.bounds = null;
 
-    // V2 Lighting
-    this.lightSource = new THREE.Vector3(-0.3, 0.2, 1.0).normalize();
+    // V4: Mesh & Texture properties
+    this.mesh = null;
+    this.textureLoader = new THREE.TextureLoader();
 
     // Physics parameters
     this.params = {
-      homeForce: 0.15,          // Softer recovery for V2
-      scatterForce: 2.5,        // Stronger scatter
-      friction: 0.90,           // More friction for precision
-      maxVelocity: 3.0,         // Faster movement allowed
-      lerpFactor: 0.15,         // Smoothing factor for direct mapping
+      homeForce: 0.1,           // V4: Gentler for reform
+      scatterForce: 3.5,        // V4: Explosive shatter
+      friction: 0.88,           // V4: High friction for precision
+      maxVelocity: 5.0,
+      lerpFactor: 0.2,
     };
 
     // Initialize particle data
@@ -86,35 +89,61 @@ export class ParticleSystem {
   }
 
   /**
-   * Create Three.js geometry and material
+   * Create Three.js geometry, material, and Mesh
    */
   createThreeJSObjects() {
+    // 1. Particle System (The "Shards")
     this.geometry = new THREE.BufferGeometry();
-
-    this.geometry.setAttribute(
-      'position',
-      new THREE.BufferAttribute(this.positions, 3)
-    );
-
-    this.geometry.setAttribute(
-      'color',
-      new THREE.BufferAttribute(this.colors, 3)
-    );
+    this.geometry.setAttribute('position', new THREE.BufferAttribute(this.positions, 3));
+    this.geometry.setAttribute('color', new THREE.BufferAttribute(this.colors, 3));
 
     const pointTexture = this.createPointTexture();
-
     this.material = new THREE.PointsMaterial({
-      size: 0.04, // V3: Extremely small particles for photo-realism
+      size: 0.04,
       vertexColors: true,
-      blending: THREE.NormalBlending, // Avoid glob look, use lighting for vibrancy
+      blending: THREE.AdditiveBlending,
       transparent: true,
-      opacity: 0.9,
-      depthWrite: true,
+      opacity: 0, // Hidden until shatter
+      depthWrite: false,
       map: pointTexture,
       sizeAttenuation: true
     });
 
     this.points = new THREE.Points(this.geometry, this.material);
+    this.points.visible = false; // V4: Hide by default
+
+    // 2. Main Earth Mesh
+    const sphereGeom = new THREE.SphereGeometry(1, 64, 64);
+    const sphereMat = new THREE.MeshStandardMaterial({
+      roughness: 0.7,
+      metalness: 0.1,
+      emissive: new THREE.Color(0x000000)
+    });
+
+    this.mesh = new THREE.Mesh(sphereGeom, sphereMat);
+    this.group = new THREE.Group();
+    this.group.add(this.mesh);
+    this.group.add(this.points);
+
+    // Initial scale
+    this.mesh.scale.setScalar(this.sphereScale);
+  }
+
+  /**
+   * Load texture and apply to mesh
+   */
+  loadTexture(url) {
+    this.textureLoader.load(url, (texture) => {
+      texture.colorSpace = THREE.SRGBColorSpace;
+      this.mesh.material.map = texture;
+      this.mesh.material.needsUpdate = true;
+      console.log('✅ Earth Mesh texture loaded');
+    });
+  }
+
+  setRadius(radius) {
+    this.sphereRadius = radius;
+    this.mesh.scale.setScalar(radius);
   }
 
   /**
@@ -142,32 +171,48 @@ export class ParticleSystem {
   }
 
   /**
-   * Scatter particles (fist gesture)
+   * Trigger Scatter/Shatter sequence
    */
   scatter(center) {
-    this.currentState = this.STATE_SCATTERED;
+    if (this.currentState !== this.STATE_SOLID) return;
 
+    this.currentState = this.STATE_SHATTERING;
+    this.mesh.visible = false;
+    this.points.visible = true;
+    this.material.opacity = 1.0;
+
+    // Force impulse for particles
     const count = this.particleCount;
     for (let i = 0; i < count; i++) {
       const i3 = i * 3;
+      const radius = Math.sqrt(
+        this.textPositions[i3] ** 2 +
+        this.textPositions[i3 + 1] ** 2 +
+        this.textPositions[i3 + 2] ** 2
+      ) || 1;
 
-      // Random direction from center
-      const angle = Math.random() * Math.PI * 2;
-      const elevation = (Math.random() - 0.5) * Math.PI;
-      const force = this.params.scatterForce * (0.5 + Math.random() * 0.5);
+      // Direction from center of sphere
+      const dirX = this.textPositions[i3] / radius;
+      const dirY = this.textPositions[i3 + 1] / radius;
+      const dirZ = this.textPositions[i3 + 2] / radius;
 
-      this.velocities[i3] += Math.cos(angle) * Math.cos(elevation) * force;
-      this.velocities[i3 + 1] += Math.sin(elevation) * force;
-      this.velocities[i3 + 2] += Math.sin(angle) * Math.cos(elevation) * force;
+      const force = this.params.scatterForce * (0.8 + Math.random() * 0.4);
+      this.velocities[i3] = dirX * force;
+      this.velocities[i3 + 1] = dirY * force;
+      this.velocities[i3 + 2] = dirZ * force;
     }
+
+    setTimeout(() => {
+      this.currentState = this.STATE_SHATTERED;
+    }, 100);
   }
 
   /**
-   * Reform text (five fingers gesture)
+   * Trigger Reform sequence
    */
   reform() {
-    this.currentState = this.STATE_FORMED;
-    // Particles will gradually return to text positions
+    if (this.currentState !== this.STATE_SHATTERED) return;
+    this.currentState = this.STATE_REFORMING;
   }
 
   /**
@@ -281,7 +326,7 @@ export class ParticleSystem {
   }
 
   getObject() {
-    return this.points;
+    return this.group;
   }
 
   createPointTexture() {

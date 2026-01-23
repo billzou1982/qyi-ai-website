@@ -12,18 +12,21 @@
  * @returns {{x: number, y: number, z: number}} Three.js world coordinates
  */
 export function mapMediaPipeToThreeJS(mpX, mpY, mpZ = 0, worldRange = 10) {
+  // Clamp input to 0-1 to avoid outlier jumps
+  const cx = Math.max(0, Math.min(1, mpX));
+  const cy = Math.max(0, Math.min(1, mpY));
+
   // MediaPipe X: 0 (left) -> 1 (right)
   // Three.js X: -range (left) -> +range (right)
-  // IMPORTANT: Mirror the X axis for intuitive interaction (flip horizontally)
-  const x = (1 - mpX) * worldRange * 2 - worldRange;
+  // Mirrored for "mirror image" feel
+  const x = (1 - cx) * worldRange * 2 - worldRange;
 
   // MediaPipe Y: 0 (top) -> 1 (bottom)
   // Three.js Y: +range (top) -> -range (bottom)
-  const y = -(mpY * worldRange * 2 - worldRange);
+  const y = -(cy * worldRange * 2 - worldRange);
 
-  // MediaPipe Z: negative values mean closer to camera
-  // Map to a reasonable depth range
-  const z = mpZ * worldRange * 0.5;
+  // V4: Ignore Z for panning to keep it stable on 2D plane
+  const z = 0;
 
   return { x, y, z };
 }

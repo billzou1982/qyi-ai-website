@@ -85,22 +85,22 @@ export function generateEarthColorsFromTexture(positions, radius, textureData, o
   const { data, width, height } = textureData;
   const colors = new Float32Array(positions.length);
 
-  const lightDirection = options.lightDirection || { x: -0.3, y: 0.2, z: 1.0 };
-  const lightLen = Math.hypot(lightDirection.x, lightDirection.y, lightDirection.z) || 1;
-  const lightDir = {
-    x: lightDirection.x / lightLen,
-    y: lightDirection.y / lightLen,
-    z: lightDirection.z / lightLen
-  };
-  const ambient = options.ambient ?? 0.25;
-  const diffuse = options.diffuse ?? 0.85;
-
   for (let i = 0; i < positions.length; i += 3) {
     const x = positions[i];
     const y = positions[i + 1];
     const z = positions[i + 2];
 
-    const lat = Math.asin(y / radius);
+    const currentRadius = Math.sqrt(x * x + y * y + z * z);
+
+    // V3: Preserve atmosphere particles (those with radius > original radius)
+    if (currentRadius > radius * 1.01) {
+      colors[i] = 0.1;
+      colors[i + 1] = 0.4;
+      colors[i + 2] = 0.8;
+      continue;
+    }
+
+    const lat = Math.asin(y / currentRadius);
     const lon = Math.atan2(z, x);
 
     const u = (lon + Math.PI) / (2 * Math.PI);
@@ -110,23 +110,24 @@ export function generateEarthColorsFromTexture(positions, radius, textureData, o
     const py = Math.min(height - 1, Math.max(0, Math.floor(v * (height - 1))));
     const idx = (py * width + px) * 4;
 
+    // V3: Sample colors and apply land-vibrancy boost
     let r = data[idx] / 255;
     let g = data[idx + 1] / 255;
     let b = data[idx + 2] / 255;
 
-    const nx = x / radius;
-    const ny = y / radius;
-    const nz = z / radius;
-    const lightFactor = Math.max(0, nx * lightDir.x + ny * lightDir.y + nz * lightDir.z);
-    const shade = ambient + diffuse * lightFactor;
+    // Detect land (yellowish/greenish/brownish vs blue/dark)
+    const isLand = (g > b * 1.05) || (r > b * 1.05 && g > 0.2);
 
-    // V2: Improved shading and topographic elevation
-    const brightness = (r + g + b) / 3;
-    const elevation = isNaN(brightness) ? 0 : brightness * 0.15; // Land/Clouds are "higher"
-
-    // Pass elevation back by modifying positions directly if needed, 
-    // but better to just return the color and handle shading in main loop.
-    // For now, let's just optimize the color sampling.
+    if (isLand) {
+      // V3: Boost land colors for visibility
+      r = Math.min(1.0, r * 1.15);
+      g = Math.min(1.0, g * 1.15);
+    } else {
+      // Deep ocean colors - keep them rich but dark
+      r *= 0.7;
+      g *= 0.7;
+      b = Math.min(1.0, b * 1.05);
+    }
 
     colors[i] = r;
     colors[i + 1] = g;
