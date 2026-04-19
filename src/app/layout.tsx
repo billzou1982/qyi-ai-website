@@ -2,6 +2,29 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { LanguageProvider } from "@/lib/i18n-context";
 import { ThemeProvider } from "@/lib/theme-context";
+import { Inter_Tight, Newsreader, JetBrains_Mono } from 'next/font/google';
+
+const interTight = Inter_Tight({
+  subsets: ['latin'],
+  variable: '--font-inter-tight',
+  display: 'swap',
+  weight: ['300', '400', '500', '600', '700'],
+});
+
+const newsreader = Newsreader({
+  subsets: ['latin'],
+  variable: '--font-newsreader',
+  display: 'swap',
+  style: ['normal', 'italic'],
+  weight: ['300', '400', '500', '600', '700'],
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ['latin'],
+  variable: '--font-jetbrains-mono',
+  display: 'swap',
+  weight: ['300', '400', '500', '600'],
+});
 
 export const metadata: Metadata = {
   title: "QYI AI - AI Native Developer | Web Apps & Mobile Solutions",
@@ -34,9 +57,6 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
-  icons: {
-    icon: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>",
-  },
 };
 
 export default function RootLayout({
@@ -45,7 +65,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className={`${interTight.variable} ${newsreader.variable} ${jetbrainsMono.variable}`}>
       <head>
         <script
           type="application/ld+json"
