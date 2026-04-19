@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="512" viewBox="0 0 1024 512">
+  <defs>
+    <linearGradient id="ocean" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2d6cd3" />
+      <stop offset="100%" stop-color="#0b4aa0" />
+    </linearGradient>
+  </defs>
+  <rect width="1024" height="512" fill="url(#ocean)" />
+  <path fill="#4caf50" d="M110 210 L190 180 L260 190 L300 230 L280 270 L210 300 L150 280 L120 240 Z" />
+  <path fill="#3d9140" d="M320 190 L380 170 L430 190 L460 240 L420 260 L360 250 Z" />
+  <path fill="#5ea05a" d="M470 220 L520 200 L600 210 L640 250 L620 280 L550 300 L500 270 Z" />
+  <path fill="#4f9a55" d="M690 200 L750 180 L820 200 L860 240 L830 280 L760 300 L700 270 Z" />
+  <path fill="#3f8f47" d="M860 300 L910 290 L950 320 L940 360 L880 370 L850 340 Z" />
+  <path fill="#4caf50" d="M250 320 L310 300 L360 320 L370 360 L330 380 L270 360 Z" />
+  <path fill="#5ea05a" d="M420 320 L470 310 L530 330 L540 370 L500 390 L450 370 Z" />
+  <path fill="#4f9a55" d="M560 320 L620 310 L680 330 L700 370 L650 390 L590 370 Z" />
+  <path fill="#f5f5f5" d="M0 20 L200 20 L240 60 L160 80 L40 60 Z" />
+  <path fill="#f5f5f5" d="M800 40 L1024 40 L1024 90 L900 110 L820 80 Z" />
+</svg>

@@ -9,7 +9,7 @@ import { Hands } from '@mediapipe/hands';
 import { Camera } from '@mediapipe/camera_utils';
 import { ParticleSystem } from './ParticleSystem.js';
 import { GestureRecognizer } from './GestureRecognizer.js';
-import { generateEarthSphere } from './TextParticles.js';
+import { generateEarthColorsFromTexture, generateEarthSphere } from './TextParticles.js';
 import { mapMediaPipeToThreeJS } from './Utils.js';
 
 // ==================== GLOBAL STATE ====================
@@ -17,8 +17,68 @@ let scene, camera, renderer, particleSystem;
 let videoTexture, videoPlane;
 let gestureRecognizer;
 let previousGesture = null;
+let previousGestureStable = false;
 let previousHandCenter = null;
 let lastLogTime = 0;
+let earthRadius = 0;
+let earthPositions = null;
+
+// ==================== TEXTURE LOADING ====================
+
+function loadEarthTexture(urls) {
+  const sourceList = Array.isArray(urls) ? urls : [urls];
+
+  return new Promise((resolve, reject) => {
+    let currentIndex = 0;
+
+    const loadNext = () => {
+      if (currentIndex >= sourceList.length) {
+        reject(new Error('No texture sources loaded.'));
+        return;
+      }
+
+      const image = new Image();
+      image.crossOrigin = 'anonymous';
+      image.onload = () => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = image.width;
+        canvas.height = image.height;
+        ctx.drawImage(image, 0, 0);
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        resolve({
+          data: imageData.data,
+          width: canvas.width,
+          height: canvas.height
+        });
+      };
+      image.onerror = () => {
+        currentIndex += 1;
+        loadNext();
+      };
+      image.src = sourceList[currentIndex];
+    };
+
+    loadNext();
+  });
+}
+
+function updateSphereBounds() {
+  const vFOV = THREE.MathUtils.degToRad(camera.fov);
+  const viewportHeight = 2 * Math.tan(vFOV / 2) * camera.position.z;
+  const viewportWidth = viewportHeight * camera.aspect;
+
+  // V2: Strict bounding - sphere radius must stay inside viewport
+  const maxX = Math.max(0, viewportWidth / 2 - earthRadius * 1.1);
+  const maxY = Math.max(0, viewportHeight / 2 - earthRadius * 1.1);
+
+  particleSystem.setBounds({
+    minX: -maxX,
+    maxX,
+    minY: -maxY,
+    maxY
+  });
+}
 
 // ==================== INITIALIZATION ====================
 
@@ -41,34 +101,52 @@ function initThreeJS() {
   });
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
 
   const container = document.getElementById('canvas-container');
   container.appendChild(renderer.domElement);
 
-  // Calculate sphere radius to occupy 1/5 of screen height
-  // At camera.position.z = 15 with FOV = 75°:
-  // viewport height = 2 * tan(FOV/2) * distance ≈ 22.2
-  // sphere diameter should be 22.2 / 5 ≈ 4.44
-  // sphere radius ≈ 2.2
+  // Calculate sphere radius to occupy 50% of screen height
   const vFOV = THREE.MathUtils.degToRad(camera.fov);
   const viewportHeight = 2 * Math.tan(vFOV / 2) * camera.position.z;
-  const sphereRadius = (viewportHeight / 5) / 2; // Diameter/5, then /2 for radius
+  const sphereRadius = (viewportHeight * 0.5) / 2; // 50% of height / 2 for radius
+  earthRadius = sphereRadius;
 
-  // Generate Earth sphere particles with realistic colors
-  const particleCount = 6000; // Increased for better sphere coverage
+  // Generate V3 Ultra-density Google Earth sphere particles
+  const particleCount = 45000;
   const earthData = generateEarthSphere(sphereRadius, particleCount);
+  earthPositions = earthData.positions;
 
   // Particle System with Earth sphere
   particleSystem = new ParticleSystem(
     particleCount,
     10,
-    earthData.positions,
+    earthPositions,
     earthData.colors
   );
   scene.add(particleSystem.getObject());
 
+  loadEarthTexture([
+    'https://eoimages.gsfc.nasa.gov/images/imagerecords/73000/73938/world.topo.bathy.200401.3x5400x2700.jpg',
+    '/textures/earth_daymap.svg'
+  ])
+    .then((textureData) => {
+      const texturedColors = generateEarthColorsFromTexture(
+        earthPositions,
+        earthRadius,
+        textureData
+      );
+      particleSystem.setColors(texturedColors);
+      console.log('✅ Earth texture applied');
+    })
+    .catch((error) => {
+      console.warn('⚠️ Failed to load Earth texture, using procedural colors.', error);
+    });
+
   // Gesture recognizer
   gestureRecognizer = new GestureRecognizer();
+
+  updateSphereBounds();
 
   // Handle window resize
   window.addEventListener('resize', onWindowResize);
@@ -112,7 +190,7 @@ function createVideoBackground(videoElement) {
   scene.add(videoPlane);
 
   console.log('✅ Video background created:', width.toFixed(2), 'x', height.toFixed(2),
-              'distance:', distanceFromCamera);
+    'distance:', distanceFromCamera);
 }
 
 /**
@@ -195,42 +273,43 @@ function handleGesture(gesture, landmarks) {
 
   switch (gesture.type) {
     case 'fist':
-      // Scatter particles (only trigger once per gesture)
-      if (previousGesture !== 'fist') {
+      // V3: REQUIRE STABILITY to prevent accidental explosions
+      if (gesture.data?.isStable && previousGesture !== 'fist') {
         const center = mapMediaPipeToThreeJS(
-          gesture.data.x,
-          gesture.data.y,
-          gesture.data.z,
+          gesture.data.center.x,
+          gesture.data.center.y,
+          gesture.data.center.z,
           worldRange
         );
-        particleSystem.scatter(center);
-        console.log('✊ SCATTER! State:', particleSystem.currentState);
+
+        // V3: Sanity check coordinates - avoid snapping to (0,0) if hand is lost
+        if (Math.abs(gesture.data.center.x - 0.5) < 0.45 && Math.abs(gesture.data.center.y - 0.5) < 0.45) {
+          particleSystem.scatter(center);
+          console.log('✊ SCATTER! (Stable trigger)');
+        }
       }
       break;
 
     case 'open_palm':
-      // Reform sphere (only trigger once per gesture)
-      if (previousGesture !== 'open_palm') {
+      // V3: REQUIRE STABILITY
+      if (gesture.data?.isStable && previousGesture !== 'open_palm') {
         particleSystem.reform();
-        console.log('🖐️ REFORM! State:', particleSystem.currentState);
+        console.log('🖐️ REFORM! (Stable trigger)');
       }
       break;
 
     case 'move_hand':
-      // Move sphere with hand movement (2-4 fingers)
-      if (gesture.data && gesture.data.delta) {
-        const delta = mapMediaPipeToThreeJS(
-          gesture.data.delta.x,
-          gesture.data.delta.y,
-          gesture.data.delta.z,
+      // Direct position mapping (1:1 with hand center)
+      if (gesture.data && gesture.data.center) {
+        const targetPos = mapMediaPipeToThreeJS(
+          gesture.data.center.x,
+          gesture.data.center.y,
+          gesture.data.center.z,
           worldRange
         );
 
-        // Only move if delta is significant (avoid jitter)
-        const magnitude = Math.sqrt(delta.x ** 2 + delta.y ** 2);
-        if (magnitude > 0.1) {
-          particleSystem.moveSphere(delta);
-        }
+        // Directly set position (ParticleSystem will handle lerp internally if needed or we do it here)
+        particleSystem.setTargetPosition(targetPos);
       }
       break;
 
@@ -243,9 +322,11 @@ function handleGesture(gesture, landmarks) {
   if (previousGesture !== gesture.type) {
     previousHandCenter = null;
     gestureRecognizer.reset();
+    previousGestureStable = false;
   }
 
   previousGesture = gesture.type;
+  previousGestureStable = Boolean(gesture.data?.isStable);
 }
 
 /**
@@ -267,6 +348,8 @@ function onWindowResize() {
     videoPlane.geometry.dispose();
     videoPlane.geometry = new THREE.PlaneGeometry(width, height);
   }
+
+  updateSphereBounds();
 }
 
 // ==================== ANIMATION LOOP ====================

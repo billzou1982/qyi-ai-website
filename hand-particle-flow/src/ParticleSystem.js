@@ -10,22 +10,32 @@ export class ParticleSystem {
     this.particleCount = particleCount;
     this.worldRange = worldRange;
 
-    // Particle states
-    this.STATE_FORMED = 'formed';      // Sphere is formed and static
-    this.STATE_SCATTERED = 'scattered'; // Particles are scattered
-    this.currentState = this.STATE_FORMED;
+    // V4: States
+    this.STATE_SOLID = 'solid';
+    this.STATE_SHATTERING = 'shattering';
+    this.STATE_SHATTERED = 'shattered';
+    this.STATE_REFORMING = 'reforming';
+    this.currentState = this.STATE_SOLID;
 
     // Transform properties
-    this.sphereOffset = new THREE.Vector3(0, 0, 0);  // Sphere position offset
-    this.sphereScale = 1.0;                          // Sphere scale
-    this.targetScale = 1.0;
+    this.sphereOffset = new THREE.Vector3(0, 0, 0);
+    this.targetPosition = new THREE.Vector3(0, 0, 0);
+    this.lastTargetUpdateTime = 0;
+    this.sphereRadius = 1.0; // Updated later
+    this.sphereScale = 1.0;
+    this.bounds = null;
+
+    // V4: Mesh & Texture properties
+    this.mesh = null;
+    this.textureLoader = new THREE.TextureLoader();
 
     // Physics parameters
     this.params = {
-      homeForce: 0.25,          // Strength of return to sphere position (increased 5x for faster recovery)
-      scatterForce: 2.0,        // Force when scattering
-      friction: 0.92,           // Velocity damping
-      maxVelocity: 2.5,         // Maximum particle velocity (increased for faster movement)
+      homeForce: 0.1,           // V4: Gentler for reform
+      scatterForce: 3.5,        // V4: Explosive shatter
+      friction: 0.88,           // V4: High friction for precision
+      maxVelocity: 5.0,
+      lerpFactor: 0.2,
     };
 
     // Initialize particle data
@@ -79,32 +89,69 @@ export class ParticleSystem {
   }
 
   /**
-   * Create Three.js geometry and material
+   * Create Three.js geometry, material, and Mesh
    */
   createThreeJSObjects() {
+    // 1. Particle System (The "Shards")
     this.geometry = new THREE.BufferGeometry();
+    this.geometry.setAttribute('position', new THREE.BufferAttribute(this.positions, 3));
+    this.geometry.setAttribute('color', new THREE.BufferAttribute(this.colors, 3));
 
-    this.geometry.setAttribute(
-      'position',
-      new THREE.BufferAttribute(this.positions, 3)
-    );
-
-    this.geometry.setAttribute(
-      'color',
-      new THREE.BufferAttribute(this.colors, 3)
-    );
-
+    const pointTexture = this.createPointTexture();
     this.material = new THREE.PointsMaterial({
-      size: 0.15,
+      size: 0.04,
       vertexColors: true,
       blending: THREE.AdditiveBlending,
       transparent: true,
-      opacity: 0.9,
+      opacity: 0, // Hidden until shatter
       depthWrite: false,
+      map: pointTexture,
       sizeAttenuation: true
     });
 
     this.points = new THREE.Points(this.geometry, this.material);
+    this.points.visible = false; // V4: Hide by default
+
+    // 2. Main Earth Mesh
+    const sphereGeom = new THREE.SphereGeometry(1, 64, 64);
+    const sphereMat = new THREE.MeshStandardMaterial({
+      roughness: 0.7,
+      metalness: 0.1,
+      emissive: new THREE.Color(0x000000)
+    });
+
+    this.mesh = new THREE.Mesh(sphereGeom, sphereMat);
+    this.group = new THREE.Group();
+    this.group.add(this.mesh);
+    this.group.add(this.points);
+
+    // Initial scale
+    this.mesh.scale.setScalar(this.sphereScale);
+  }
+
+  /**
+   * Load texture and apply to mesh
+   */
+  loadTexture(url) {
+    this.textureLoader.load(url, (texture) => {
+      texture.colorSpace = THREE.SRGBColorSpace;
+      this.mesh.material.map = texture;
+      this.mesh.material.needsUpdate = true;
+      console.log('✅ Earth Mesh texture loaded');
+    });
+  }
+
+  setRadius(radius) {
+    this.sphereRadius = radius;
+    this.mesh.scale.setScalar(radius);
+  }
+
+  /**
+   * Set target position for the sphere (handled in update via lerp)
+   */
+  setTargetPosition(pos) {
+    this.targetPosition.copy(pos);
+    this.lastTargetUpdateTime = Date.now();
   }
 
   /**
@@ -124,32 +171,48 @@ export class ParticleSystem {
   }
 
   /**
-   * Scatter particles (fist gesture)
+   * Trigger Scatter/Shatter sequence
    */
   scatter(center) {
-    this.currentState = this.STATE_SCATTERED;
-    
+    if (this.currentState !== this.STATE_SOLID) return;
+
+    this.currentState = this.STATE_SHATTERING;
+    this.mesh.visible = false;
+    this.points.visible = true;
+    this.material.opacity = 1.0;
+
+    // Force impulse for particles
     const count = this.particleCount;
     for (let i = 0; i < count; i++) {
       const i3 = i * 3;
-      
-      // Random direction from center
-      const angle = Math.random() * Math.PI * 2;
-      const elevation = (Math.random() - 0.5) * Math.PI;
-      const force = this.params.scatterForce * (0.5 + Math.random() * 0.5);
-      
-      this.velocities[i3] += Math.cos(angle) * Math.cos(elevation) * force;
-      this.velocities[i3 + 1] += Math.sin(elevation) * force;
-      this.velocities[i3 + 2] += Math.sin(angle) * Math.cos(elevation) * force;
+      const radius = Math.sqrt(
+        this.textPositions[i3] ** 2 +
+        this.textPositions[i3 + 1] ** 2 +
+        this.textPositions[i3 + 2] ** 2
+      ) || 1;
+
+      // Direction from center of sphere
+      const dirX = this.textPositions[i3] / radius;
+      const dirY = this.textPositions[i3 + 1] / radius;
+      const dirZ = this.textPositions[i3 + 2] / radius;
+
+      const force = this.params.scatterForce * (0.8 + Math.random() * 0.4);
+      this.velocities[i3] = dirX * force;
+      this.velocities[i3 + 1] = dirY * force;
+      this.velocities[i3 + 2] = dirZ * force;
     }
+
+    setTimeout(() => {
+      this.currentState = this.STATE_SHATTERED;
+    }, 100);
   }
 
   /**
-   * Reform text (five fingers gesture)
+   * Trigger Reform sequence
    */
   reform() {
-    this.currentState = this.STATE_FORMED;
-    // Particles will gradually return to text positions
+    if (this.currentState !== this.STATE_SHATTERED) return;
+    this.currentState = this.STATE_REFORMING;
   }
 
   /**
@@ -160,8 +223,28 @@ export class ParticleSystem {
     const posAttr = this.geometry.attributes.position;
     const colorAttr = this.geometry.attributes.color;
 
-    // Smoothly interpolate scale
-    this.sphereScale += (this.targetScale - this.sphereScale) * 0.1;
+    // V2: Directly lerp sphereOffset to targetPosition for 1:1 hand tracking
+    // V3: Check if target was recently updated; if not, return to center
+    const now = Date.now();
+    const handLost = (now - this.lastTargetUpdateTime) > 500; // 500ms fallback
+
+    const actualTarget = handLost ? new THREE.Vector3(0, 0, 0) : this.targetPosition;
+    const currentLerp = handLost ? 0.05 : this.params.lerpFactor; // Slower return to center
+
+    this.sphereOffset.x += (actualTarget.x - this.sphereOffset.x) * currentLerp;
+    this.sphereOffset.y += (actualTarget.y - this.sphereOffset.y) * currentLerp;
+    this.sphereOffset.z += (actualTarget.z - this.sphereOffset.z) * currentLerp;
+
+    // Strict boundary locking with smooth resistance
+    if (this.bounds) {
+      const margin = 0.5; // Padding from edge
+      this.sphereOffset.x = Math.max(this.bounds.minX + margin, Math.min(this.bounds.maxX - margin, this.sphereOffset.x));
+      this.sphereOffset.y = Math.max(this.bounds.minY + margin, Math.min(this.bounds.maxY - margin, this.sphereOffset.y));
+    }
+
+    // Dynamic shading parameters
+    const ambient = 0.15;
+    const diffuse = 0.85;
 
     for (let i = 0; i < count; i++) {
       const i3 = i * 3;
@@ -181,10 +264,20 @@ export class ParticleSystem {
         this.velocities[i3 + 1] += dy * this.params.homeForce;
         this.velocities[i3 + 2] += dz * this.params.homeForce;
 
-        // Keep original Earth colors when formed
-        this.colors[i3] = this.initialColors[i3];
-        this.colors[i3 + 1] = this.initialColors[i3 + 1];
-        this.colors[i3 + 2] = this.initialColors[i3 + 2];
+        // V2: Dynamic Shading (Day/Night side)
+        // Only apply to atmosphere/outer particles if needed or to all
+        const nx = this.textPositions[i3]; // Normalized position (since original radius is fixed)
+        const ny = this.textPositions[i3 + 1];
+        const nz = this.textPositions[i3 + 2];
+
+        // Simplified dot product for shading
+        const lightLen = Math.sqrt(nx * nx + ny * ny + nz * nz) || 1;
+        const lightFactor = Math.max(0, (nx / lightLen) * this.lightSource.x + (ny / lightLen) * this.lightSource.y + (nz / lightLen) * this.lightSource.z);
+        const shade = ambient + diffuse * lightFactor;
+
+        this.colors[i3] = this.initialColors[i3] * shade;
+        this.colors[i3 + 1] = this.initialColors[i3 + 1] * shade;
+        this.colors[i3 + 2] = this.initialColors[i3 + 2] * shade;
 
       } else if (this.currentState === this.STATE_SCATTERED) {
         // In scattered mode, particles fly freely
@@ -233,7 +326,47 @@ export class ParticleSystem {
   }
 
   getObject() {
-    return this.points;
+    return this.group;
+  }
+
+  createPointTexture() {
+    const size = 128; // Higher resolution
+    const canvas = document.createElement('canvas');
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext('2d');
+
+    const gradient = ctx.createRadialGradient(
+      size / 2, size / 2, 0,
+      size / 2, size / 2, size / 2
+    );
+
+    // Softer gradient for "Google Earth" particle feel
+    gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
+    gradient.addColorStop(0.2, 'rgba(255, 255, 255, 0.8)');
+    gradient.addColorStop(0.5, 'rgba(255, 255, 255, 0.3)');
+    gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, size, size);
+
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.needsUpdate = true;
+    return texture;
+  }
+
+  setBounds(bounds) {
+    this.bounds = bounds;
+  }
+
+  setColors(newColors) {
+    if (!newColors || newColors.length !== this.colors.length) {
+      return;
+    }
+
+    this.colors.set(newColors);
+    this.initialColors.set(newColors);
+    this.geometry.attributes.color.needsUpdate = true;
   }
 
   dispose() {

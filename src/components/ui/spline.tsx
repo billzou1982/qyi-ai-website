@@ -1,27 +1,36 @@
 'use client'
 
-import { Suspense, lazy, useState } from 'react'
+import { Suspense, lazy, useState, useEffect } from 'react'
+
 const Spline = lazy(() => import('@splinetool/react-spline'))
 
 interface SplineSceneProps {
   scene: string
   className?: string
+  fallback?: React.ReactNode
 }
 
-function SplineWithErrorBoundary({ scene, className }: SplineSceneProps) {
+function detectWebGL(): boolean {
+  try {
+    const canvas = document.createElement('canvas')
+    return !!(
+      canvas.getContext('webgl') ||
+      canvas.getContext('experimental-webgl')
+    )
+  } catch {
+    return false
+  }
+}
+
+function SplineWithErrorBoundary({ scene, className }: Omit<SplineSceneProps, 'fallback'>) {
   const [hasError, setHasError] = useState(false)
 
   if (hasError) {
     return (
-      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 rounded-lg border-2 border-dashed border-blue-200">
-        <div className="text-center p-6">
-          <div className="text-6xl mb-4">🎯</div>
-          <h3 className="text-lg font-semibold text-gray-700 mb-2">Interactive 3D Experience</h3>
-          <p className="text-gray-500 text-sm">This space will showcase interactive 3D content</p>
-          <div className="mt-4 px-4 py-2 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
-            Coming Soon
-          </div>
-        </div>
+      <div className="w-full h-full flex items-center justify-center">
+        <p className="font-mono text-xs text-muted-foreground tracking-widest">
+          3D SCENE UNAVAILABLE
+        </p>
       </div>
     )
   }
@@ -35,15 +44,46 @@ function SplineWithErrorBoundary({ scene, className }: SplineSceneProps) {
   )
 }
 
-export function SplineScene({ scene, className }: SplineSceneProps) {
+export function SplineScene({ scene, className, fallback }: SplineSceneProps) {
+  // null = not yet checked, true/false = result
+  const [webglOk, setWebglOk] = useState<boolean | null>(null)
+
+  useEffect(() => {
+    setWebglOk(detectWebGL())
+  }, [])
+
+  // Still detecting
+  if (webglOk === null) {
+    return (
+      <div className="w-full h-full flex items-center justify-center">
+        <span className="font-mono text-xs text-[#D97757] animate-pulse tracking-widest">
+          LOADING 3D
+        </span>
+      </div>
+    )
+  }
+
+  // WebGL unavailable — show provided fallback or generic message
+  if (!webglOk) {
+    return fallback ? (
+      <>{fallback}</>
+    ) : (
+      <div className="w-full h-full flex items-center justify-center">
+        <p className="font-mono text-xs text-muted-foreground tracking-widest">
+          3D UNAVAILABLE
+        </p>
+      </div>
+    )
+  }
+
+  // WebGL available — load Spline
   return (
-    <Suspense 
+    <Suspense
       fallback={
-        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 rounded-lg">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-2"></div>
-            <p className="text-gray-600 text-sm">Loading 3D Scene...</p>
-          </div>
+        <div className="w-full h-full flex items-center justify-center">
+          <span className="font-mono text-xs text-[#D97757] animate-pulse tracking-widest">
+            LOADING 3D
+          </span>
         </div>
       }
     >

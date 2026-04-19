@@ -8,7 +8,7 @@ export class GestureRecognizer {
     this.previousGesture = null;
     this.previousHandCenter = null;
     this.gestureStartTime = null;
-    this.gestureStableThreshold = 300; // Gesture must be stable for 300ms before triggering move
+    this.gestureStableThreshold = 250; // V3: Increased for reliability against false positives
   }
 
   /**
@@ -48,7 +48,10 @@ export class GestureRecognizer {
     if (extendedFingers <= 1) {
       return {
         type: 'fist',
-        data: handCenter
+        data: {
+          center: handCenter,
+          isStable: isGestureStable
+        }
       };
     }
 
@@ -56,7 +59,10 @@ export class GestureRecognizer {
     if (extendedFingers >= 5) {
       return {
         type: 'open_palm',
-        data: handCenter
+        data: {
+          center: handCenter,
+          isStable: isGestureStable
+        }
       };
     }
 
@@ -64,8 +70,8 @@ export class GestureRecognizer {
     if (extendedFingers >= 2 && extendedFingers <= 4) {
       const moveDelta = { x: 0, y: 0, z: 0 };
 
-      // Only allow movement if gesture has been stable for threshold duration
-      if (isGestureStable && this.previousHandCenter) {
+      // Remove stability check for movement to eliminate lag
+      if (this.previousHandCenter) {
         moveDelta.x = handCenter.x - this.previousHandCenter.x;
         moveDelta.y = handCenter.y - this.previousHandCenter.y;
         moveDelta.z = handCenter.z - this.previousHandCenter.z;
@@ -101,14 +107,14 @@ export class GestureRecognizer {
    */
   countExtendedFingers(landmarks) {
     let count = 0;
-    
+
     // Thumb (special case - check horizontal distance)
     const thumbTip = landmarks[4];
     const thumbBase = landmarks[2];
     if (Math.abs(thumbTip.x - thumbBase.x) > 0.05) {
       count++;
     }
-    
+
     // Other fingers (check if tip is above base)
     const fingers = [
       { tip: 8, base: 6 },   // Index
@@ -116,13 +122,13 @@ export class GestureRecognizer {
       { tip: 16, base: 14 }, // Ring
       { tip: 20, base: 18 }  // Pinky
     ];
-    
+
     for (const finger of fingers) {
       if (this.isFingerExtended(landmarks, finger.tip, finger.base)) {
         count++;
       }
     }
-    
+
     return count;
   }
 

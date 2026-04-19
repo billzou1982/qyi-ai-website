@@ -1,19 +1,19 @@
 "use client";
 
 import dynamic from 'next/dynamic';
-import { SparklesPreviewDark } from "@/components/ui/demo";
 import { Navbar } from "@/components/ui/navbar";
-import { StaticSpotlight } from "@/components/ui/static-spotlight";
+import { ErrorBoundary } from "@/components/ui/error-boundary";
 import { useIsMobile } from "@/lib/use-mobile";
+import { Mail, Linkedin, Github, Play, Terminal, Video, FileText, Hand, Image } from "lucide-react";
+import { useLanguage } from "@/lib/i18n-context";
 
-// Dynamically import heavy 3D components for better performance (desktop only)
 const EnhancedRobot = dynamic(
   () => import('@/components/ui/enhanced-robot').then(mod => ({ default: mod.EnhancedRobot })),
   {
     ssr: false,
     loading: () => (
       <div className="w-full h-full flex items-center justify-center">
-        <div className="animate-pulse text-blue-400">Loading 3D Scene...</div>
+        <span className="font-mono text-xs text-[#D97757] animate-pulse tracking-widest">LOADING 3D</span>
       </div>
     )
   }
@@ -25,177 +25,295 @@ const SplineRobotProfessional = dynamic(
     ssr: false,
     loading: () => (
       <div className="w-full h-full flex items-center justify-center">
-        <div className="animate-pulse text-blue-400">Loading Interactive Demo...</div>
+        <span className="font-mono text-xs text-[#D97757] animate-pulse tracking-widest">LOADING SCENE</span>
       </div>
     )
   }
 );
 
-const SplineAppCard = dynamic(
-  () => import('@/components/ui/spline-demo').then(mod => ({ default: mod.SplineAppCard })),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="w-full h-full bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl animate-pulse"></div>
-    )
-  }
-);
-import {
-  Bot,
-  Zap,
-  Mail,
-  Linkedin,
-  Github,
-  Play,
-  Terminal,
-  Video,
-  Sparkles,
-  FileText,
-  Hand,
-  Image
-} from "lucide-react";
-import { useLanguage } from "@/lib/i18n-context";
+function HeroSvgFallback() {
+  return (
+    <svg viewBox="0 0 200 200" className="w-48 h-48 text-[#D97757]" fill="none" stroke="currentColor">
+      <circle cx="100" cy="100" r="78" strokeWidth="1" strokeOpacity="0.4" />
+      <circle cx="100" cy="100" r="50" strokeWidth="1.5" strokeOpacity="0.7" />
+      <circle cx="100" cy="100" r="24" strokeWidth="2" />
+      <line x1="22" y1="100" x2="178" y2="100" strokeWidth="0.5" strokeOpacity="0.3" />
+      <line x1="100" y1="22" x2="100" y2="178" strokeWidth="0.5" strokeOpacity="0.3" />
+      <line x1="45" y1="45" x2="155" y2="155" strokeWidth="0.5" strokeOpacity="0.2" />
+      <line x1="155" y1="45" x2="45" y2="155" strokeWidth="0.5" strokeOpacity="0.2" />
+      <circle cx="100" cy="100" r="4" fill="currentColor" strokeWidth="0" />
+    </svg>
+  );
+}
 
 export default function Home() {
   const { t } = useLanguage();
   const isMobile = useIsMobile();
+
+  const apps = [
+    {
+      title: t('apps.app4.title'),
+      desc: t('apps.app4.desc'),
+      tags: ["Content Creation", "AI Writing"],
+      url: "https://opal.google/?flow=drive:/1d99AfQwquu7yl5MfAPm0nnP7Una_L8H8&shared&mode=app",
+      icon: FileText,
+    },
+    {
+      title: t('apps.app5.title'),
+      desc: t('apps.app5.desc'),
+      tags: ["Computer Vision", "Three.js"],
+      url: "/hand-particle-flow/index.html",
+      icon: Hand,
+    },
+    {
+      title: t('apps.app6.title'),
+      desc: t('apps.app6.desc'),
+      tags: ["Video Analysis", "YouTube"],
+      url: null,
+      icon: Video,
+    },
+    {
+      title: t('apps.app7.title'),
+      desc: t('apps.app7.desc'),
+      tags: ["Social Media", "Xiaohongshu"],
+      url: null,
+      icon: Image,
+    },
+  ];
+
+  const articles = [
+    {
+      tag: t('articles.art1.tag'),
+      date: "Dec 2024",
+      title: t('articles.art1.title'),
+      desc: t('articles.art1.desc'),
+    },
+    {
+      tag: t('articles.art2.tag'),
+      date: "Nov 2024",
+      title: t('articles.art2.title'),
+      desc: t('articles.art2.desc'),
+    },
+    {
+      tag: t('articles.art3.tag'),
+      date: "Oct 2024",
+      title: t('articles.art3.title'),
+      desc: t('articles.art3.desc'),
+    },
+  ];
+
+  const videos = [
+    {
+      title: t('videos.vid1.title'),
+      desc: t('videos.vid1.desc'),
+      duration: "12:34",
+      views: "15K",
+    },
+    {
+      title: t('videos.vid2.title'),
+      desc: t('videos.vid2.desc'),
+      duration: "18:45",
+      views: "8.2K",
+    },
+    {
+      title: t('videos.vid3.title'),
+      desc: t('videos.vid3.desc'),
+      duration: "25:12",
+      views: "12K",
+    },
+  ];
+
   return (
-    <div>
+    <div className="bg-background text-foreground">
       <Navbar />
 
-      {/* Hero Section - Left/Right Layout */}
-      <section className="relative h-screen bg-gradient-to-br from-slate-900 to-slate-950 -mt-16 pt-16 flex items-center">
-        {/* 背景层 - z-0 */}
-        <div className="absolute inset-0 overflow-hidden z-0">
-          <SparklesPreviewDark />
-        </div>
-        {/* SplineHeroBackground removed to eliminate geometric shapes */}
+      {/* ── Hero ── */}
+      <section className="relative min-h-screen -mt-14 pt-14 flex items-center bg-background border-b border-border">
+        <div className="max-w-7xl mx-auto px-6 w-full">
+          <div className="grid md:grid-cols-[3fr_2fr] gap-8 md:gap-12 items-center py-16 md:py-24">
 
-        {/* Spotlight 光圈效果 - z-2 */}
-        <div className="absolute inset-0 z-2">
-          <StaticSpotlight
-            className="left-1/4 top-1/3"
-            size="small"
-            fill="white"
-          />
-        </div>
-
-        {/* 内容层 - z-10 */}
-        <div className="relative z-10 w-full">
-          <div className="max-w-7xl mx-auto px-6 w-full">
-            <div className="grid md:grid-cols-[2fr_3fr] gap-6 md:gap-8 items-center h-full py-8 md:py-16">
-
-              {/* Left Side - Content */}
-              <div className="flex flex-col justify-center space-y-6 md:space-y-8 text-center md:text-left order-2 md:order-1 px-4 md:px-0">
-                <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-5xl font-bold text-white tracking-wider leading-tight whitespace-nowrap">
+            {/* Left — Content */}
+            <div className="flex flex-col justify-center space-y-8 order-2 md:order-1">
+              <div className="space-y-2">
+                <p className="font-mono text-xs text-[#D97757] tracking-[0.2em] uppercase">
+                  AI Native Developer
+                </p>
+                <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-normal leading-tight tracking-tight text-foreground">
                   {t('hero.title')}
                 </h1>
-
-                <div className="flex flex-col sm:flex-row gap-2 md:gap-3 max-w-sm mx-auto md:mx-0">
-                  <a
-                    href="#apps"
-                    className="px-4 md:px-6 py-2 md:py-3 bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-lg font-medium hover:shadow-lg hover:-translate-y-1 transition-all duration-300 text-center text-sm"
-                  >
-                    {t('hero.explore')}
-                  </a>
-                  <a
-                    href="#contact"
-                    className="px-4 md:px-6 py-2 md:py-3 border-2 border-blue-500 text-blue-500 rounded-lg font-medium hover:bg-blue-500 hover:text-white transition-all duration-300 text-center text-sm"
-                  >
-                    {t('hero.contact')}
-                  </a>
-                </div>
               </div>
-
-              {/* Right Side - 3D Robot with Welcome */}
-              <div className="flex justify-center items-center order-1 md:order-2 relative z-20 overflow-visible">
-                {!isMobile ? (
-                  <div className="w-full h-[350px] sm:h-[400px] md:h-[450px] lg:h-[500px] xl:h-[550px] relative">
-                    <EnhancedRobot />
-                  </div>
-                ) : (
-                  <div className="w-full h-[350px] flex items-center justify-center">
-                    <div className="relative group">
-                      <div className="absolute inset-0 bg-blue-500/20 blur-3xl rounded-full animate-pulse"></div>
-                      <Sparkles className="w-32 h-32 text-blue-400 relative z-10 animate-pulse" />
-                    </div>
-                  </div>
-                )}
-              </div>
-
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* About Section */}
-      <section id="about" className="py-24 bg-slate-50 dark:bg-slate-900 relative overflow-hidden">
-        {/* Decorative background element */}
-        <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-slate-300 dark:via-slate-700 to-transparent opacity-50"></div>
-
-        <div className="max-w-6xl mx-auto px-6 relative z-10">
-          <div className="text-center mb-20">
-            <h2 className="text-3xl md:text-5xl font-bold mb-6 text-slate-900 dark:text-white tracking-tight">{t('about.title')}</h2>
-            <div className="flex justify-center mb-10">
-              <div className="relative group">
-                <div className="absolute inset-0 bg-blue-500/20 blur-xl rounded-full group-hover:bg-blue-500/30 transition-all duration-500"></div>
-                <div className="relative w-24 h-24 bg-gradient-to-br from-white to-gray-100 dark:from-slate-800 dark:to-slate-700 rounded-2xl shadow-lg flex items-center justify-center border border-gray-200 dark:border-gray-600 group-hover:scale-105 transition-transform duration-500">
-                  <Bot className="w-12 h-12 text-blue-600 dark:text-blue-400" />
-                </div>
-                <div className="absolute -top-3 -right-3 w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg rotate-12 group-hover:rotate-0 transition-all duration-300">
-                  <Zap className="w-5 h-5 fill-current" />
-                </div>
-              </div>
-            </div>
-            <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">{t('about.role')}</h3>
-            <div className="max-w-3xl mx-auto space-y-4 text-gray-600 dark:text-gray-300 text-lg leading-relaxed">
-              <p>
+              <p className="text-muted-foreground text-lg leading-relaxed max-w-md">
                 {t('about.desc1')}
               </p>
-              <p>
-                {t('about.desc2')}
-              </p>
+              <div className="flex flex-wrap gap-3">
+                <a
+                  href="#apps"
+                  className="px-5 py-2.5 bg-[#D97757] text-white text-sm font-medium rounded hover:bg-[#c4673e] transition-colors"
+                >
+                  {t('hero.explore')}
+                </a>
+                <a
+                  href="#contact"
+                  className="px-5 py-2.5 border border-border text-foreground text-sm font-medium rounded hover:border-[#D97757] hover:text-[#D97757] transition-colors"
+                >
+                  {t('hero.contact')}
+                </a>
+              </div>
             </div>
 
-            {/* Skills */}
-            <div className="flex flex-wrap justify-center gap-3 mt-10 mb-8">
+            {/* Right — 3D Robot */}
+            <div className="flex justify-center items-center order-1 md:order-2">
+              {!isMobile ? (
+                <div className="w-full h-[300px] md:h-[360px] lg:h-[420px] rounded-lg overflow-hidden border border-border/40 bg-[#0d0c0b]">
+                  <ErrorBoundary fallback={
+                    <div className="w-full h-full flex items-center justify-center">
+                      <HeroSvgFallback />
+                    </div>
+                  }>
+                    <EnhancedRobot />
+                  </ErrorBoundary>
+                </div>
+              ) : (
+                <HeroSvgFallback />
+              )}
+            </div>
+
+          </div>
+        </div>
+
+        {/* Subtle rule accent */}
+        <div className="absolute bottom-0 left-0 right-0 h-px bg-border" />
+      </section>
+
+      {/* ── About ── */}
+      <section id="about" className="py-24 bg-background border-b border-border">
+        <div className="max-w-4xl mx-auto px-6">
+          <div className="flex items-center gap-3 mb-10">
+            <span className="font-mono text-xs text-[#D97757] tracking-widest">01</span>
+            <div className="h-px flex-1 bg-border" />
+          </div>
+          <h2 className="font-serif text-3xl md:text-4xl font-normal text-foreground mb-3">
+            {t('about.title')}
+          </h2>
+          <p className="font-mono text-xs text-[#D97757] tracking-widest uppercase mb-8">
+            {t('about.role')}
+          </p>
+          <div className="space-y-4 text-muted-foreground text-base leading-relaxed max-w-2xl">
+            <p>{t('about.desc1')}</p>
+            <p>{t('about.desc2')}</p>
+          </div>
+
+          <div className="mt-10 pt-8 border-t border-border">
+            <p className="font-mono text-xs text-muted-foreground tracking-widest uppercase mb-4">
+              Stack
+            </p>
+            <p className="font-mono text-sm text-muted-foreground leading-relaxed">
               {[
                 "Machine Learning", "Deep Learning", "Computer Vision", "NLP",
-                "Python", "TensorFlow", "PyTorch", "React", "Next.js", "Node.js",
-                "AWS", "Docker", "Kubernetes"
-              ].map((skill) => (
-                <span key={skill} className="px-5 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 rounded-xl text-sm font-medium hover:border-blue-400 dark:hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-400 hover:shadow-md transition-all duration-300 cursor-default flex items-center gap-2 group">
-                  <span className="w-1.5 h-1.5 rounded-full bg-blue-400 group-hover:bg-blue-600 dark:group-hover:bg-blue-400 transition-colors"></span>
-                  {skill}
-                </span>
-              ))}
-            </div>
+                "Python", "TensorFlow", "PyTorch", "React", "Next.js",
+                "Node.js", "AWS", "Docker"
+              ].join(" · ")}
+            </p>
           </div>
         </div>
       </section>
 
-      {/* Interactive Experience Section */}
-      <section className="py-24 bg-slate-900 relative overflow-hidden">
-        <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))] opacity-10"></div>
-        <div className="max-w-6xl mx-auto px-6 relative z-10">
-          <div className="text-center mb-20">
-            <h2 className="text-3xl md:text-5xl font-bold mb-6 text-white tracking-tight">{t('interactive.title')}</h2>
-            <p className="text-xl text-slate-300 max-w-2xl mx-auto leading-relaxed">{t('interactive.subtitle')}</p>
+      {/* ── Apps ── */}
+      <section id="apps" className="py-24 bg-background border-b border-border">
+        <div className="max-w-4xl mx-auto px-6">
+          <div className="flex items-center gap-3 mb-10">
+            <span className="font-mono text-xs text-[#D97757] tracking-widest">02</span>
+            <div className="h-px flex-1 bg-border" />
           </div>
+          <h2 className="font-serif text-3xl md:text-4xl font-normal text-foreground mb-3">
+            {t('apps.title')}
+          </h2>
+          <p className="text-muted-foreground text-sm mb-12 max-w-xl">
+            {t('apps.subtitle')}
+          </p>
 
+          <div className="divide-y divide-border">
+            {apps.map((app, i) => {
+              const Icon = app.icon;
+              const inner = (
+                <div className="py-6 flex items-start gap-6 group cursor-default">
+                  <span className="font-mono text-xs text-[#D97757] pt-1 w-6 shrink-0">
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-4">
+                      <h3 className="font-serif text-xl font-normal text-foreground group-hover:text-[#D97757] transition-colors">
+                        {app.title}
+                      </h3>
+                      {app.url && (
+                        <span className="text-[#D97757] text-lg shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                          →
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-muted-foreground text-sm mt-1.5 leading-relaxed">
+                      {app.desc}
+                    </p>
+                    <div className="flex items-center gap-4 mt-3">
+                      <Icon className="w-3.5 h-3.5 text-muted-foreground" />
+                      {app.tags.map(tag => (
+                        <span key={tag} className="font-mono text-xs text-muted-foreground">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              );
+
+              return app.url ? (
+                <a
+                  key={i}
+                  href={app.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block hover:bg-secondary/30 transition-colors -mx-2 px-2 rounded"
+                >
+                  {inner}
+                </a>
+              ) : (
+                <div key={i} className="opacity-70">
+                  {inner}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Interactive ── */}
+      <section className="py-24 bg-secondary/20 border-b border-border">
+        <div className="max-w-4xl mx-auto px-6">
+          <div className="flex items-center gap-3 mb-10">
+            <span className="font-mono text-xs text-[#D97757] tracking-widest">03</span>
+            <div className="h-px flex-1 bg-border" />
+          </div>
+          <h2 className="font-serif text-3xl md:text-4xl font-normal text-foreground mb-3">
+            {t('interactive.title')}
+          </h2>
+          <p className="text-muted-foreground text-sm mb-12">
+            {t('interactive.subtitle')}
+          </p>
           <div className="flex justify-center">
             {!isMobile ? (
-              <div className="w-full max-w-4xl h-[500px]">
-                <SplineRobotProfessional />
+              <div className="w-full h-[460px] rounded border border-border overflow-hidden">
+                <ErrorBoundary fallback={
+                  <div className="w-full h-full flex items-center justify-center">
+                    <span className="font-mono text-xs text-muted-foreground tracking-widest">3D UNAVAILABLE</span>
+                  </div>
+                }>
+                  <SplineRobotProfessional />
+                </ErrorBoundary>
               </div>
             ) : (
-              <div className="w-full max-w-4xl min-h-[400px] flex flex-col items-center justify-center text-center px-6 py-12 bg-slate-800/50 rounded-2xl border border-slate-700">
-                <div className="relative mb-6">
-                  <div className="absolute inset-0 bg-blue-500/20 blur-2xl rounded-full"></div>
-                  <Bot className="w-24 h-24 text-blue-400 relative z-10 animate-bounce" />
-                </div>
-                <h3 className="text-2xl font-bold text-white mb-4">{t('interactive.mobileTitle')}</h3>
-                <p className="text-slate-300 max-w-md leading-relaxed">
+              <div className="w-full min-h-[200px] flex flex-col items-center justify-center text-center py-12 border border-border rounded">
+                <HeroSvgFallback />
+                <p className="font-mono text-xs text-muted-foreground mt-4 tracking-wide">
                   {t('interactive.mobileMessage')}
                 </p>
               </div>
@@ -204,254 +322,107 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Web Applications Section */}
-      <section id="apps" className="py-24 bg-white dark:bg-slate-950">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="text-center mb-20">
-            <h2 className="text-3xl md:text-5xl font-bold mb-6 text-slate-900 dark:text-white tracking-tight">{t('apps.title')}</h2>
-            <p className="text-xl text-slate-600 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed">
-              {t('apps.subtitle')}
-            </p>
+      {/* ── Writing ── */}
+      <section id="writing" className="py-24 bg-background border-b border-border">
+        <div className="max-w-4xl mx-auto px-6">
+          <div className="flex items-center gap-3 mb-10">
+            <span className="font-mono text-xs text-[#D97757] tracking-widest">04</span>
+            <div className="h-px flex-1 bg-border" />
+          </div>
+          <div className="flex items-center gap-3 mb-12">
+            <Terminal className="w-4 h-4 text-muted-foreground" />
+            <h2 className="font-serif text-3xl md:text-4xl font-normal text-foreground">
+              {t('articles.title')}
+            </h2>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[
-              {
-                title: t('apps.app4.title'),
-                desc: t('apps.app4.desc'),
-                tags: ["Content Creation", "AI Writing", "Blog Generation"],
-                url: "https://opal.google/?flow=drive:/1d99AfQwquu7yl5MfAPm0nnP7Una_L8H8&shared&mode=app",
-                icon: <FileText className="w-8 h-8 text-white" />
-              },
-              {
-                title: t('apps.app5.title'),
-                desc: t('apps.app5.desc'),
-                tags: ["Computer Vision", "3D Graphics", "Interactive"],
-                url: "/hand-particle-flow/index.html",
-                icon: <Hand className="w-8 h-8 text-white" />
-              },
-              {
-                title: t('apps.app6.title'),
-                desc: t('apps.app6.desc'),
-                tags: ["Video Analysis", "AI Content", "YouTube"],
-                url: null,
-                icon: <Video className="w-8 h-8 text-white" />
-              },
-              {
-                title: t('apps.app7.title'),
-                desc: t('apps.app7.desc'),
-                tags: ["Social Media", "Visual Content", "Xiaohongshu"],
-                url: null,
-                icon: <Image className="w-8 h-8 text-white" />
-              }
-            ].map((app, index) => (
-              <div key={index} className="group">
-                {!isMobile ? (
-                  app.url ? (
-                    <a
-                      href={app.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="block h-full"
-                    >
-                      <SplineAppCard
-                        title={app.title}
-                        description={app.desc}
-                        icon={app.icon}
-                      />
-                    </a>
-                  ) : (
-                    <SplineAppCard
-                      title={app.title}
-                      description={app.desc}
-                      icon={app.icon}
-                    />
-                  )
-                ) : (
-                  app.url ? (
-                    <a
-                      href={app.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="block h-full"
-                    >
-                      <div className="h-full min-h-[280px] p-8 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-gray-200 hover:shadow-lg hover:border-blue-300 transition-all duration-300 hover:-translate-y-1 flex flex-col cursor-pointer">
-                        <div className="mb-6">
-                          <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-700 rounded-xl flex items-center justify-center shadow-lg">
-                            {app.icon}
-                          </div>
-                        </div>
-                        <h3 className="font-bold text-xl text-gray-900 mb-3">{app.title}</h3>
-                        <p className="text-sm text-gray-600 leading-relaxed flex-grow">{app.desc}</p>
-                      </div>
-                    </a>
-                  ) : (
-                    <div className="h-full min-h-[280px] p-8 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-gray-200 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 flex flex-col">
-                      <div className="mb-6">
-                        <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-700 rounded-xl flex items-center justify-center shadow-lg">
-                          {app.icon}
-                        </div>
-                      </div>
-                      <h3 className="font-bold text-xl text-gray-900 mb-3">{app.title}</h3>
-                      <p className="text-sm text-gray-600 leading-relaxed flex-grow">{app.desc}</p>
-                    </div>
-                  )
-                )}
+          <div className="divide-y divide-border">
+            {articles.map((art, i) => (
+              <article key={i} className="py-8 group cursor-pointer hover:bg-secondary/30 transition-colors -mx-2 px-2 rounded">
+                <div className="flex items-center gap-3 mb-3">
+                  <span className="font-mono text-xs text-[#D97757] border border-[#D97757]/40 px-2 py-0.5 rounded">
+                    {art.tag}
+                  </span>
+                  <span className="font-mono text-xs text-muted-foreground">{art.date}</span>
+                </div>
+                <h3 className="font-serif text-xl font-normal text-foreground group-hover:text-[#D97757] transition-colors mb-2">
+                  {art.title}
+                </h3>
+                <p className="text-muted-foreground text-sm leading-relaxed max-w-xl">
+                  {art.desc}
+                </p>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Video Tutorials ── */}
+      <section id="video-tutorials" className="py-24 bg-secondary/20 border-b border-border">
+        <div className="max-w-4xl mx-auto px-6">
+          <div className="flex items-center gap-3 mb-10">
+            <span className="font-mono text-xs text-[#D97757] tracking-widest">05</span>
+            <div className="h-px flex-1 bg-border" />
+          </div>
+          <div className="flex items-center justify-between gap-4 mb-12 flex-wrap">
+            <div className="flex items-center gap-3">
+              <Video className="w-4 h-4 text-muted-foreground" />
+              <h2 className="font-serif text-3xl md:text-4xl font-normal text-foreground">
+                {t('videos.title')}
+              </h2>
+            </div>
+            <a
+              href="https://youtube.com/@qyi-ai"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-mono text-xs text-[#D97757] hover:underline tracking-wide"
+            >
+              {t('videos.subscribe')}
+            </a>
+          </div>
+
+          <div className="divide-y divide-border">
+            {videos.map((vid, i) => (
+              <div key={i} className="py-6 flex items-start gap-6 group cursor-pointer hover:bg-secondary/30 transition-colors -mx-2 px-2 rounded">
+                <div className="flex items-center justify-center w-10 h-10 border border-border rounded shrink-0 group-hover:border-[#D97757] group-hover:text-[#D97757] text-muted-foreground transition-colors">
+                  <Play className="w-4 h-4 fill-current" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-serif text-lg font-normal text-foreground group-hover:text-[#D97757] transition-colors mb-1">
+                    {vid.title}
+                  </h3>
+                  <p className="text-muted-foreground text-sm leading-relaxed mb-2">
+                    {vid.desc}
+                  </p>
+                  <div className="flex items-center gap-3">
+                    <span className="font-mono text-xs text-muted-foreground">{vid.duration}</span>
+                    <span className="font-mono text-xs text-muted-foreground">{vid.views} views</span>
+                  </div>
+                </div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Article & Video Section */}
-      <section className="py-24 bg-slate-50 dark:bg-slate-900">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="grid md:grid-cols-2 gap-16">
-            {/* Articles */}
-            <div>
-              <h3 className="text-2xl font-bold mb-8 text-slate-900 dark:text-white flex items-center gap-3">
-                <span className="p-2 bg-blue-100 dark:bg-blue-900/50 rounded-lg text-blue-600 dark:text-blue-400"><Terminal size={24} /></span>
-                {t('articles.title')}
-              </h3>
-              <div className="space-y-8">
-                <div className="group p-6 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1">
-                  <div className="flex items-center gap-3 mb-3">
-                    <span className="px-3 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs font-bold rounded-full uppercase tracking-wide">{t('articles.art1.tag')}</span>
-                    <span className="text-slate-400 dark:text-slate-500 text-xs">Dec 2024</span>
-                  </div>
-                  <h4 className="font-bold text-xl text-slate-900 dark:text-white mb-3 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{t('articles.art1.title')}</h4>
-                  <p className="text-slate-600 dark:text-gray-300 leading-relaxed">
-                    {t('articles.art1.desc')}
-                  </p>
-                </div>
-
-                <div className="group p-6 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1">
-                  <div className="flex items-center gap-3 mb-3">
-                    <span className="px-3 py-1 bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 text-xs font-bold rounded-full uppercase tracking-wide">{t('articles.art2.tag')}</span>
-                    <span className="text-slate-400 dark:text-slate-500 text-xs">Nov 2024</span>
-                  </div>
-                  <h4 className="font-bold text-xl text-slate-900 dark:text-white mb-3 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">{t('articles.art2.title')}</h4>
-                  <p className="text-slate-600 dark:text-gray-300 leading-relaxed">
-                    {t('articles.art2.desc')}
-                  </p>
-                </div>
-
-                <div className="group p-6 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1">
-                  <div className="flex items-center gap-3 mb-3">
-                    <span className="px-3 py-1 bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 text-xs font-bold rounded-full uppercase tracking-wide">{t('articles.art3.tag')}</span>
-                    <span className="text-slate-400 dark:text-slate-500 text-xs">Oct 2024</span>
-                  </div>
-                  <h4 className="font-bold text-xl text-slate-900 dark:text-white mb-3 group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">{t('articles.art3.title')}</h4>
-                  <p className="text-slate-600 dark:text-gray-300 leading-relaxed">
-                    {t('articles.art3.desc')}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Video Content */}
-            <div id="video-tutorials">
-              <h3 className="text-2xl font-bold mb-8 text-slate-900 dark:text-white flex items-center gap-3">
-                <span className="p-2 bg-red-100 dark:bg-red-900/50 rounded-lg text-red-600 dark:text-red-400"><Video size={24} /></span>
-                {t('videos.title')}
-              </h3>
-              <div className="space-y-8">
-                {/* Video Card 1 */}
-                <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 hover:shadow-lg transition-all duration-300 overflow-hidden">
-                  <div className="relative">
-                    {/* Video Thumbnail */}
-                    <div className="aspect-video bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900 flex items-center justify-center relative">
-                      <div className="absolute inset-0 bg-black/20"></div>
-                      <div className="relative z-10 text-center">
-                        <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mb-4 mx-auto backdrop-blur-md border border-white/20 group-hover:scale-110 transition-transform duration-300">
-                          <Play className="w-8 h-8 text-white fill-white" />
-                        </div>
-                        <h4 className="text-white font-semibold text-lg drop-shadow-md">{t('videos.vid1.title')}</h4>
-                      </div>
-                      {/* Duration badge */}
-                      <div className="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-1 rounded">12:34</div>
-                    </div>
-                    {/* Video Info */}
-                    <div className="p-4">
-                      <h4 className="font-bold text-lg mb-2 text-gray-900 dark:text-white">{t('videos.vid1.title')}</h4>
-                      <div className="text-sm text-gray-500 dark:text-gray-400 mb-2">15K views • 2 days ago</div>
-                      <p className="text-gray-600 dark:text-gray-300 text-sm">{t('videos.vid1.desc')}</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Video Card 2 */}
-                <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 hover:shadow-lg transition-all duration-300 overflow-hidden">
-                  <div className="relative">
-                    {/* Video Thumbnail */}
-                    <div className="aspect-video bg-gradient-to-br from-green-900 via-teal-900 to-cyan-900 flex items-center justify-center relative">
-                      <div className="absolute inset-0 bg-black/20"></div>
-                      <div className="relative z-10 text-center">
-                        <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mb-4 mx-auto backdrop-blur-md border border-white/20 group-hover:scale-110 transition-transform duration-300">
-                          <Play className="w-8 h-8 text-white fill-white" />
-                        </div>
-                        <h4 className="text-white font-semibold text-lg drop-shadow-md">{t('videos.vid2.title')}</h4>
-                      </div>
-                      {/* Duration badge */}
-                      <div className="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-1 rounded">18:45</div>
-                    </div>
-                    {/* Video Info */}
-                    <div className="p-4">
-                      <h4 className="font-bold text-lg mb-2 text-gray-900 dark:text-white">{t('videos.vid2.title')}</h4>
-                      <div className="text-sm text-gray-500 dark:text-gray-400 mb-2">8.2K views • 1 week ago</div>
-                      <p className="text-gray-600 dark:text-gray-300 text-sm">{t('videos.vid2.desc')}</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Video Card 3 */}
-                <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 hover:shadow-lg transition-all duration-300 overflow-hidden">
-                  <div className="relative">
-                    {/* Video Thumbnail */}
-                    <div className="aspect-video bg-gradient-to-br from-orange-900 via-red-900 to-pink-900 flex items-center justify-center relative">
-                      <div className="absolute inset-0 bg-black/20"></div>
-                      <div className="relative z-10 text-center">
-                        <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mb-4 mx-auto backdrop-blur-md border border-white/20 group-hover:scale-110 transition-transform duration-300">
-                          <Play className="w-8 h-8 text-white fill-white" />
-                        </div>
-                        <h4 className="text-white font-semibold text-lg drop-shadow-md">{t('videos.vid3.title')}</h4>
-                      </div>
-                      {/* Duration badge */}
-                      <div className="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-1 rounded">25:12</div>
-                    </div>
-                    {/* Video Info */}
-                    <div className="p-4">
-                      <h4 className="font-bold text-lg mb-2 text-gray-900 dark:text-white">{t('videos.vid3.title')}</h4>
-                      <div className="text-sm text-gray-500 dark:text-gray-400 mb-2">12K views • 2 weeks ago</div>
-                      <p className="text-gray-600 dark:text-gray-300 text-sm">{t('videos.vid3.desc')}</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="mt-6">
-                <a href="https://youtube.com/@qyi-ai" target="_blank" rel="noopener noreferrer"
-                  className="text-blue-500 dark:text-blue-400 font-medium hover:text-blue-600 dark:hover:text-blue-300">
-                  {t('videos.subscribe')}
-                </a>
-              </div>
-            </div>
+      {/* ── Contact ── */}
+      <section id="contact" className="py-24 bg-background border-b border-border">
+        <div className="max-w-4xl mx-auto px-6">
+          <div className="flex items-center gap-3 mb-10">
+            <span className="font-mono text-xs text-[#D97757] tracking-widest">06</span>
+            <div className="h-px flex-1 bg-border" />
           </div>
-        </div>
-      </section>
-
-      {/* Contact Section */}
-      <section id="contact" className="py-24 bg-slate-900 relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-900/20 via-slate-900 to-slate-900"></div>
-        <div className="max-w-4xl mx-auto px-6 text-center relative z-10">
-          <h2 className="text-3xl md:text-5xl font-bold mb-6 text-white">{t('contact.title')}</h2>
-          <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
+          <h2 className="font-serif text-3xl md:text-5xl font-normal text-foreground mb-4 max-w-2xl">
+            {t('contact.title')}
+          </h2>
+          <p className="text-muted-foreground text-base mb-10 max-w-lg leading-relaxed">
             {t('contact.subtitle')}
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+          <div className="flex flex-wrap gap-3 mb-14">
             <a
               href="mailto:contact@qyi.ai"
-              className="px-8 py-4 bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-xl font-semibold hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
+              className="px-5 py-2.5 bg-[#D97757] text-white text-sm font-medium rounded hover:bg-[#c4673e] transition-colors"
             >
               {t('contact.getInTouch')}
             </a>
@@ -459,46 +430,48 @@ export default function Home() {
               href="https://linkedin.com/in/qyi-ai"
               target="_blank"
               rel="noopener noreferrer"
-              className="px-8 py-4 border-2 border-blue-500 text-blue-400 rounded-xl font-semibold hover:bg-blue-500 hover:text-white transition-all duration-300"
+              className="px-5 py-2.5 border border-border text-foreground text-sm font-medium rounded hover:border-[#D97757] hover:text-[#D97757] transition-colors"
             >
               {t('contact.connect')}
             </a>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8 text-center">
-            <div className="p-6 rounded-2xl bg-slate-800/50 border border-slate-700 hover:bg-slate-800 transition-all duration-300 group hover:-translate-y-1 hover:shadow-lg hover:shadow-blue-500/10">
-              <div className="w-14 h-14 mx-auto bg-gradient-to-br from-blue-500/10 to-indigo-500/10 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform border border-blue-500/20">
-                <Mail className="w-7 h-7 text-blue-400" />
-              </div>
-              <h3 className="text-lg font-bold text-white mb-2">{t('contact.email')}</h3>
-              <p className="text-slate-400 group-hover:text-blue-400 transition-colors">contact@qyi.ai</p>
-            </div>
-            <div className="p-6 rounded-2xl bg-slate-800/50 border border-slate-700 hover:bg-slate-800 transition-all duration-300 group hover:-translate-y-1 hover:shadow-lg hover:shadow-blue-500/10">
-              <div className="w-14 h-14 mx-auto bg-gradient-to-br from-blue-500/10 to-indigo-500/10 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform border border-blue-500/20">
-                <Linkedin className="w-7 h-7 text-blue-400" />
-              </div>
-              <h3 className="text-lg font-bold text-white mb-2">{t('contact.linkedin')}</h3>
-              <p className="text-slate-400 group-hover:text-blue-400 transition-colors">@qyi-ai</p>
-            </div>
-            <div className="p-6 rounded-2xl bg-slate-800/50 border border-slate-700 hover:bg-slate-800 transition-all duration-300 group hover:-translate-y-1 hover:shadow-lg hover:shadow-blue-500/10">
-              <div className="w-14 h-14 mx-auto bg-gradient-to-br from-blue-500/10 to-indigo-500/10 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform border border-blue-500/20">
-                <Github className="w-7 h-7 text-blue-400" />
-              </div>
-              <h3 className="text-lg font-bold text-white mb-2">{t('contact.github')}</h3>
-              <p className="text-slate-400 group-hover:text-blue-400 transition-colors">@qyi-ai</p>
-            </div>
+          <div className="grid sm:grid-cols-3 gap-6 pt-8 border-t border-border">
+            {[
+              { icon: Mail, label: t('contact.email'), value: "contact@qyi.ai", href: "mailto:contact@qyi.ai" },
+              { icon: Linkedin, label: t('contact.linkedin'), value: "@qyi-ai", href: "https://linkedin.com/in/qyi-ai" },
+              { icon: Github, label: t('contact.github'), value: "@qyi-ai", href: "https://github.com/qyi-ai" },
+            ].map(({ icon: Icon, label, value, href }) => (
+              <a
+                key={label}
+                href={href}
+                target={href.startsWith('mailto') ? undefined : '_blank'}
+                rel={href.startsWith('mailto') ? undefined : 'noopener noreferrer'}
+                className="flex items-center gap-3 group"
+              >
+                <Icon className="w-4 h-4 text-[#D97757] shrink-0" />
+                <div>
+                  <p className="font-mono text-xs text-muted-foreground tracking-wide uppercase">{label}</p>
+                  <p className="text-sm text-foreground group-hover:text-[#D97757] transition-colors">{value}</p>
+                </div>
+              </a>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-black py-8">
-        <div className="max-w-6xl mx-auto px-6 text-center">
-          <p className="text-gray-400">
+      {/* ── Footer ── */}
+      <footer className="py-8 bg-background">
+        <div className="max-w-4xl mx-auto px-6 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <span className="font-mono text-xs text-[#D97757]">◆</span>
+            <span className="font-serif text-sm text-muted-foreground">QYI AI</span>
+          </div>
+          <p className="font-mono text-xs text-muted-foreground">
             {t('footer.copyright')}
           </p>
         </div>
       </footer>
     </div>
-  )
+  );
 }
