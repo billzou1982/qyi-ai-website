@@ -13,14 +13,10 @@ function SplineWithErrorBoundary({ scene, className }: SplineSceneProps) {
 
   if (hasError) {
     return (
-      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 rounded-lg border-2 border-dashed border-blue-200">
-        <div className="text-center p-6">
-          <div className="text-6xl mb-4">🎯</div>
-          <h3 className="text-lg font-semibold text-gray-700 mb-2">Interactive 3D Experience</h3>
-          <p className="text-gray-500 text-sm">This space will showcase interactive 3D content</p>
-          <div className="mt-4 px-4 py-2 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
-            Coming Soon
-          </div>
+      <div className="w-full h-full flex items-center justify-center">
+        <div className="text-center space-y-2">
+          <p className="font-mono text-xs text-muted-foreground tracking-widest">3D SCENE UNAVAILABLE</p>
+          <p className="font-mono text-xs text-muted-foreground/60">Visit on a WebGL-enabled browser</p>
         </div>
       </div>
     )
@@ -37,13 +33,12 @@ function SplineWithErrorBoundary({ scene, className }: SplineSceneProps) {
 
 export function SplineScene({ scene, className }: SplineSceneProps) {
   return (
-    <Suspense 
+    <Suspense
       fallback={
-        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 rounded-lg">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-2"></div>
-            <p className="text-gray-600 text-sm">Loading 3D Scene...</p>
-          </div>
+        <div className="w-full h-full flex items-center justify-center">
+          <span className="font-mono text-xs text-[#D97757] animate-pulse tracking-widest">
+            LOADING 3D
+          </span>
         </div>
       }
     >

@@ -164,8 +164,12 @@ export default function Home() {
             {/* Right — 3D Robot */}
             <div className="flex justify-center items-center order-1 md:order-2">
               {!isMobile ? (
-                <div className="w-full h-[300px] md:h-[360px] lg:h-[420px]">
-                  <ErrorBoundary fallback={<HeroSvgFallback />}>
+                <div className="w-full h-[300px] md:h-[360px] lg:h-[420px] rounded-lg overflow-hidden border border-border/40 bg-[#0d0c0b]">
+                  <ErrorBoundary fallback={
+                    <div className="w-full h-full flex items-center justify-center">
+                      <HeroSvgFallback />
+                    </div>
+                  }>
                     <EnhancedRobot />
                   </ErrorBoundary>
                 </div>
