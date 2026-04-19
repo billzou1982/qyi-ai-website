@@ -1,20 +1,21 @@
 'use client'
 
 import { SplineScene } from './spline'
+import { RobotSvgFallback } from './robot-fallback'
 
 interface SplineRobotSceneProps {
   className?: string
 }
 
 export function SplineRobotScene({ className }: SplineRobotSceneProps) {
-  // 使用21st.dev同款高质量机器人场景
   const sceneUrl = "https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
-  
+
   return (
     <div className={`w-full h-full ${className}`}>
-      <SplineScene 
+      <SplineScene
         scene={sceneUrl}
         className="w-full h-full"
+        fallback={<RobotSvgFallback />}
       />
     </div>
   )
